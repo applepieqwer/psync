@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+
 from psync import psyncFileLib
 p = psyncFileLib()
 p.selectDistribute()

@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
 #---------------------linux only-----------------------
 #this is a picture sync tool
 
@@ -216,6 +217,10 @@ class psyncFileDistribute():
 		File_Distribute.create(fid=self.__fid,did=did)
 		#reload
 		self.recheck()
+	def remove(self,did):
+		File_Distribute.where(fid=self.__fid,did=did).delete().execute()
+		#reload
+		self.recheck()
 
 class psyncFile():
 	def __init__(self,f,file_only=False):
@@ -227,9 +232,14 @@ class psyncFile():
 			raise ValueError('File ORM Object is None')
 		self.__f = deepcopy(f)
 		if not file_only:
-			self.tags = psyncFileTag(f.fid)
-			self.converters = psyncFileConverter(f.fid)
-			self.distributes = psyncFileDistribute(f.fid)
+			self.load_all()
+
+	#重新加载所有附加内容
+	def load_all(self):
+		self.tags = psyncFileTag(f.fid)
+		self.converters = psyncFileConverter(f.fid)
+		self.distributes = psyncFileDistribute(f.fid)
+		
 	def __getitem__(self, i):
 		return self.__f.__getattribute__(i)
 
@@ -461,7 +471,7 @@ class psyncFileLib():
 
 	#选择操作所使用的目标，并保存用户名和密码
 	def selectDistribute(self):
-		print "选择需要上传的主机，文件将以FTP的形式上传到主机上，并在数据库中记录。"
+		print u'选择需要上传的主机，文件将以FTP的形式上传到主机上，并在数据库中记录。'
 		for d in self.distribute.values():
 			print d['did'],d['distname'].encode('utf8'),d['distserver'].encode('utf8')
 		self.selected_distribute['did'] = int(raw_input('Select Distribute: '))
@@ -634,6 +644,9 @@ class psyncFileLib():
 	#根据不同类型获得所有File对象
 	def listFileByType(self,t,file_only = False):
 		return [psyncFile(f,file_only) for f in File.where(type=t).getall()]
+	#根据所选的主机ID获得所有File对象
+	def listFileByDistribute(self,d,file_only = False):
+		return [psyncFile(f,file_only) for f in File_Distribute_View.where(did=d).getall()]
 	#列出所有缺少tag号的文件
 	def listFIDByMissingTag(self,t):
 		result = Database.execute("SELECT `file`.`fid` FROM `file` left join `file_tag` on `file`.`fid`=`file_tag`.`fid` and `file_tag`.`tid`=" + str(t) + " where `file_tag`.`tid` is null")
