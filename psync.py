@@ -461,6 +461,7 @@ class psyncFileLib():
 
 	#选择操作所使用的目标，并保存用户名和密码
 	def selectDistribute(self):
+		print "选择需要上传的主机，文件将以FTP的形式上传到主机上，并在数据库中记录。"
 		for d in self.distribute.values():
 			print d['did'],d['distname'].encode('utf8'),d['distserver'].encode('utf8')
 		self.selected_distribute['did'] = int(raw_input('Select Distribute: '))
@@ -498,8 +499,8 @@ class psyncFileLib():
 		#默认ftp存放路径为 ~/Data/psync
 		default_path = 'Data/psync/%s'%filename[0]
 		d = self.distribute[self.selected_distribute['did']]
-		cmd = 'wput -t 3 \"%s\" ftp://%s:%s@%s/%s/%s'%(src,self.selected_distribute['username'],self.selected_distribute['password'],d['distserver'],default_path,filename)
-		return os.system(cmd)
+		cmd = 'wput -t 3 \"%s\" ftp://%s:%s@%s/%s/%s'%(src.decode('utf8'),self.selected_distribute['username'],self.selected_distribute['password'],d['distserver'],default_path,filename)
+		return os.system(cmd.encode('utf8'))
 	
 	#调用sha1sum
 	def sha1sum(self,filepath):
