@@ -370,6 +370,8 @@ class psyncFile():
 	
 
 	def disk_hash_check(self):
+		if not os.path.isfile(self.disk_location()):
+			return False
 		f = os.popen('sha1sum -b \'' + self.disk_location() + '\'')
 		fhash = f.readline()[:40]
 		return (fhash == self.__f.fhash)
