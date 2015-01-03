@@ -91,6 +91,14 @@ class File_Distribute_View(Model):
 	distserver = Field()
 	dtime = Field()
 
+class Distribute_Fsize_View(Model):
+	table_name='distribute_fsize_view'
+	did = Field()
+	distname = Field()
+	disttype = Field()
+	distserver = Field()
+	fsize = Field()
+
 class File_Converter_View(Model):
 	table_name = 'file_converter_view'
 	fid = PrimaryKey()
