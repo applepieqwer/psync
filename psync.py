@@ -443,13 +443,13 @@ class psyncFile():
 		
 
 class psyncFileLib():
+	#///////////////初始化////////////////////////
 	psync_host = '192.168.1.1'
 	psync_user = 'psync'
 	psync_pass = '123456'
 	psync_db = 'psync'
 	selected_distribute = {'did':1,'username':'applepie','password':''}
-	
-	#///////////////初始化////////////////////////
+	selected_local =  None
 	tag = {}
 	distribute = {}
 	converter = {}
@@ -501,6 +501,14 @@ class psyncFileLib():
 			print 'Test error '
 			ftp.quit()
 			return False
+
+	#选择本地文件所在的主机标志，在部分功能时要使用
+	def selectLocal(self):
+		print u'选择本地文件所在的主机标志，系统将以这个标志在数据库中查找文件并校验。'
+		for d in self.distribute.values():
+			print '[ID: %d] %s/%s'%(d['did'],d['distname'],d['distserver'])
+		self.selected_local = int(raw_input('Select Local: '))
+		return self.selected_local
 
 	#Convert初始化和新建
 	def __readConverter(self):
@@ -625,6 +633,19 @@ class psyncFileLib():
 			print 'file hash found in db, upload skipped'
 			return (2,new_hash)
 
+	#将本地ID上的一个文件上传到远程ID上
+	def syncFile(self,dist_did,fid):
+		fp = self.readFileByID(fid)
+		r = self.wput(fp.disk_location(),fp.disk_filename())
+		if r == 0:
+			fp.distributes.add(dist_did)
+			del fp
+			return True
+		else:
+			del fp
+			return False
+		
+		
 	#搜索文件，返回一个文件列表
 	def searchFile(self,d = '/home/applepie/Data/psync/PicToImport/'):
 		t = ['jpg','jpeg','mp4','mov','3gp','mts','avi']
@@ -659,6 +680,9 @@ class psyncFileLib():
 	def listFIDByMissingTag(self,t):
 		result = Database.execute("SELECT `file`.`fid` FROM `file` left join `file_tag` on `file`.`fid`=`file_tag`.`fid` and `file_tag`.`tid`=" + str(t) + " where `file_tag`.`tid` is null")
 		return [f[0] for f in result.fetchall()]
+	#列出所在主机位置的文件ID
+	def listFIDByDistribute(self,d):
+		return [f.fid for f in File_Distribute.where(did=d).getall()]
 
 	#all date
 	def listItem(self,v):
