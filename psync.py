@@ -236,9 +236,9 @@ class psyncFile():
 
 	#重新加载所有附加内容
 	def load_all(self):
-		self.tags = psyncFileTag(f.fid)
-		self.converters = psyncFileConverter(f.fid)
-		self.distributes = psyncFileDistribute(f.fid)
+		self.tags = psyncFileTag(self.__f.fid)
+		self.converters = psyncFileConverter(self.__f.fid)
+		self.distributes = psyncFileDistribute(self.__f.fid)
 		
 	def __getitem__(self, i):
 		return self.__f.__getattribute__(i)
@@ -274,7 +274,6 @@ class psyncFile():
 		elif t == 'video/x-msvideo':
 			return '.avi'
 		else:
-			print '!!!!!unknow type:',t
 			return '.unknown'
 
 	def xml(self,default_image_cvalue='1024',default_video_cvalue='1280x720'):
@@ -548,7 +547,6 @@ class psyncFileLib():
 		elif t == 'video/x-msvideo':
 			return '.avi'
 		else:
-			print '!!!!!unknow type:',t
 			return '.unknown'
 	
 	#导入一个文件，src为文件位置，导入完成后，原文件将会被删除
