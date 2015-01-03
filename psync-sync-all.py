@@ -14,6 +14,10 @@ if raw_input('Select Y or n: ') == 'Y':
 	dist_fid_list = p.listFIDByDistribute(dist_did)
 	for i in [x for x in local_fid_list if x not in dist_fid_list]:
 		print "正在同步[ID:%d]"%i
-		p.syncFile(dist_did,i)
+		r = p.syncFile(dist_did,i)
+		if r:
+			print "同步成功"
+		else:
+			print "同步失败"
 else:
 	print "退出"
