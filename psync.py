@@ -624,7 +624,8 @@ class psyncFileLib():
 			r = self.wput(src,new_filename)
 			if r == 0:
 				new_file = File(fhash=new_hash,type=new_mime,filename=b64encode(filename),filetime=mtime)
-				new_file.save()
+				new_id = new_file.save()
+				File_Distribute.create(fid=new_id,did=self.selected_distribute['did'])
 				return (0,new_hash)
 			else:
 				print 'wput error returned'
