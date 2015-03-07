@@ -17,6 +17,7 @@ if len(sys.argv)<3:
 	print_help()
 	exit(1)
 
+KUAIPAN_TMP = '/tmp/.kuaipan_tmp'
 filehash = sys.argv[1]
 filename = sys.argv[2]
 (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.lstat(filename)
@@ -24,7 +25,7 @@ bs = int(size / 100 / 1024 / 1024) + 1
 cnt = int(size / (bs *1024 * 1024)) + 1
 tasks = []
 for i in range(cnt):
-	cmd = 'dd if=\"' + filename + '\" of=.kuaipan_tmp bs=' + str(bs) + 'M skip=' + str(i) + ' count=1'
+	cmd = 'dd if=\"' + filename + '\" of=' + KUAIPAN_TMP + ' bs=' + str(bs) + 'M skip=' + str(i) + ' count=1'
 	kf_name = '/' + filehash[0] + '/' + filehash + '/' + os.path.basename(filename) + '.p' + str(i)
 	tasks.append({'cmd':str(cmd),'kf_name':str(kf_name),'hash':None})
 tasks_dir = '/' + filehash[0] + '/' + filehash
@@ -36,9 +37,9 @@ try:
 except:
 	kf = kuaipan.auth_me(CACHED_KEYFILE)
 
-ai = kf.account_info()
-print 'Account name:',ai['user_name']
-print 'Quota used pct: %d%%'%(ai['quota_used']/ ai['quota_total']*100)
+#ai = kf.account_info()
+#print 'Account name:',ai['user_name']
+#print 'Quota used pct: %d%%'%(ai['quota_used']/ ai['quota_total']*100)
 hash_list=[]
 kf_info = 503
 while (kf_info == 503):
@@ -58,7 +59,7 @@ print 'hash_list',hash_list
 
 for i in range(cnt):
 	os.system(tasks[i]['cmd'])
-	target_hash = sha1sum('.kuaipan_tmp')
+	target_hash = sha1sum(KUAIPAN_TMP)
 	print '%d/%d hash = %s'%(i+1,cnt,target_hash)
 	if target_hash not in hash_list:
 		while (target_hash != tasks[i]['hash']):
@@ -69,7 +70,7 @@ for i in range(cnt):
 					if kf_info == 404:
 						#upload it
 						print 'upload it'
-						kf.upload_file('.kuaipan_tmp', kuaipan_path=tasks[i]['kf_name'], ForceOverwrite=True)
+						kf.upload_file(KUAIPAN_TMP, kuaipan_path=tasks[i]['kf_name'], ForceOverwrite=True)
 					kf_info = 503
 				else:
 					if 'sha1' in kf_info.keys():
