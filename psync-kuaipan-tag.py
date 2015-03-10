@@ -3,11 +3,14 @@
 import os
 from psync import psyncFileLib
 
+total_size = 0
+max_size = 4 * 1024 * 1024 * 1024
 p = psyncFileLib()
 #find tag = 6, tag for 快盘
 for f in p.listFIDByMissingTag(6):
 	print '[ID: %d]'%f
 	pf = p.readFileByID(f)
+	
 	cmd = 'python psync-kuaipan-upload.py %s %s'%(pf['fhash'],pf.disk_location())
 	r = os.system(cmd)
 	if r == 0:
