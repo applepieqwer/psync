@@ -61,6 +61,7 @@ class File_Converter(Model):
 	table_name = 'file_converter'
 	fid = PrimaryKey()
 	cid = PrimaryKey()
+	did = PrimaryKey()
 	result = Field()
 	convert_time = Field()
 
@@ -112,6 +113,7 @@ class File_Converter_View(Model):
 	cvalue = Field()
 	result = Field()
 	convert_time = Field()
+	did = PrimaryKey()
 
 class psyncFileTag():
 	def __init__(self,fid):
@@ -157,12 +159,13 @@ class psyncFileConverter():
 		self.__fid = deepcopy(fid)
 		self.recheck()
 	def __getitem__(self, key):
-		return self.__conv[key]['result']
+		return self.__conv[key]
 	def __setitem__(self, key,value):
+		# a[did] = ['1024','result']
 		#this is update not insert,use 'add' for new converter
-		cid = self.__conv[key]['cid']
-		self.__conv[key]['result'] = value
-		File_Converter.where(fid=self.__fid,cid=cid).update(result = value).execute()
+		cid = self.__conv[key][value[0]]['cid']
+		self.__conv[key][value[0]]['result'] = value[1]
+		File_Converter.where(fid=self.__fid,cid=cid,did=key).update(result = value[1]).execute()
 	def __iter__(self):
 		return iter(self.__conv)
 	def __str__(self):
@@ -173,23 +176,21 @@ class psyncFileConverter():
 			r = r + '#%s): %s %s @%s\n' %(self.__conv[k]['cid'],k,self.__conv[k]['result'],self.__conv[k]['convert_time'])
 		r = r + 'total %d converters'%len(self.__conv)
 		return r.encode('utf8')
-	def xml(self):
-		if len(self.__conv) == 0:
-			return '<count>0</count>'
-		r = '<count>%d</count>'%len(self.__conv)
-		for k in self.__conv.keys():
-			r = r + '<c><cid>%s</cid><cvalue>%s</cvalue><result>%s</result><convert_time>%s</convert_time></c>'%(self.__conv[k]['cid'],k,self.__conv[k]['result'],self.__conv[k]['convert_time'])
-		return r.encode('utf8')
 	def recheck(self):
 		convid = deepcopy(psyncFileLib.converter)
 		for t in File_Converter.findall(fid = self.__fid):
-			self.__conv[convid[t.cid]['cvalue']]={'cid':t.cid,'result':t.result,'convert_time':t.convert_time}
-	def add(self,cid,result):
-		File_Converter.create(fid=self.__fid,cid=cid,result=result)
+			if not self.__conv.has_key(t.did):
+				self.__conv[t.did]={}
+			self.__conv[t.did][convid[t.cid]['cvalue']]={'did':t.did,'cid':t.cid,'result':t.result,'convert_time':t.convert_time}
+	def add(self,did,cid,result):
+		File_Converter.create(fid=self.__fid,cid=cid,did=did,result=result)
 		#reload
 		self.recheck()
-	def is_converted(self,cvalue):
-		return (cvalue in self.__conv.keys())
+	def is_converted(self,did,cvalue):
+		if self.__conv.has_key(did):
+			return self.__conv[did].has_key(cvalue)
+		else:
+			return False
 	def keys(self):
 		return self.__conv.keys()
 
@@ -236,6 +237,7 @@ class psyncFile():
 		self.tags = None
 		self.converters = None
 		self.distributes = None
+		self.selected_local = psyncFileLib.selected_local
 		if f == None:
 			raise ValueError('File ORM Object is None')
 		self.__f = deepcopy(f)
@@ -334,9 +336,9 @@ class psyncFile():
 	def url_location(self):
 		return u'/psync/%s/%s' %(self.__f.fhash[0], self.disk_filename())
 	def disk_converter_location(self,cvalue):
-		return u'/home/applepie/Data/psync/%s/converter/%s.%s%s' % (self.__f.fhash[0], self.__f.fhash, cvalue, switch_type(self.__f.type))
+		return u'/home/applepie/Data/psync/%s/converter/%s.%s%s' % (self.__f.fhash[0], self.__f.fhash, cvalue, self.mime2extension(self.__f.type))
 	def url_converter_location(self,cvalue):
-		return u'/psync/%s/converter/%s.%s%s' % (self.__f.fhash[0], self.__f.fhash, cvalue, switch_type(self.__f.type))
+		return u'/psync/%s/converter/%s.%s%s' % (self.__f.fhash[0], self.__f.fhash, cvalue, self.mime2extension(self.__f.type))
 	def disk_video_converter_dir(self):
 		return u'/home/applepie/Data/psync/%s/converter/%s/' % (self.__f.fhash[0], self.__f.fhash)
 	def disk_video_converter_flv_location(self,cvalue):
@@ -409,14 +411,12 @@ class psyncFile():
 			cmd = 'convert \'%s\' -resize %sx%s \'%s\'' % (self.disk_location(),cvalue,cvalue,self.disk_converter_location(cvalue))
 			print 'converting %s to %s.'%(self.__f.fhash,cvalue)
 			os.system(cmd)
-			self.converters[cvalue]=u'converted'
 			return
 		elif ctype in ('video/mp2t','video/quicktime','video/mp4','video/x-msvideo'):
 			if (not isfile(self.disk_video_converter_gif_location())) or force:
 				self.__gif_convert(cid,ctype,cvalue)
 			if (not isfile(self.disk_video_converter_flv_location(cvalue))) or force:
 				self.__video_convert(cid,ctype,cvalue)
-			self.converters[cvalue]=u'converted'
 			return
 
 	def convert(self,cvalue,force=False):
@@ -426,20 +426,23 @@ class psyncFile():
 				new_cid = c['cid']
 				new_ctype = c['ctype']
 				new_cvalue = c['cvalue']
+				new_did = self.selected_local
 		if new_cid == None:
 			raise ValueError('cvalue not found')
 			return
-		isc = self.converters.is_converted(cvalue)
+		isc = self.converters.is_converted(new_did,cvalue)
 		if isc:
 			if force:
-				self.converters[cvalue]=u'converting'
+				self.converters[new_did]=[cvalue,u'converting']
 				self.__convert(new_cid,new_ctype,new_cvalue,force)
+				self.converters[new_did]=[cvalue,u'converted']
 			else:
 				print 'cvalue = %s is converted ,plz use force'%cvalue
 				return
 		else:
-			self.converters.add(new_cid,u'converting')
+			self.converters.add(new_did,new_cid,u'converting')
 			self.__convert(new_cid,new_ctype,new_cvalue,force)
+			self.converters[new_did]=[cvalue,u'converted']
 		
 
 class psyncFileLib():
@@ -459,6 +462,7 @@ class psyncFileLib():
 		self.__readTag()
 		self.__readDistribute()
 		self.__readConverter()
+		self.selectLocal()
 
 	#tag初始化和新建
 	def __readTag(self):
@@ -507,8 +511,8 @@ class psyncFileLib():
 		print u'选择本地文件所在的主机标志，系统将以这个标志在数据库中查找文件并校验。'
 		for d in self.distribute.values():
 			print '[ID: %d] %s/%s'%(d['did'],d['distname'],d['distserver'])
-		self.selected_local = int(raw_input('Select Local: '))
-		return self.selected_local
+		psyncFileLib.selected_local =  int(raw_input('Select Local: '))
+		return psyncFileLib.selected_local
 
 	#Convert初始化和新建
 	def __readConverter(self):
@@ -574,7 +578,11 @@ class psyncFileLib():
 	def import_and_delete_same(self,src):
 		(r,e) = self.importFile(src)
 		if r == 2:
-			os.unlink(src)
+			try:
+				os.unlink(src)
+			except OSError:
+				print 'Unlink Error, May Be Read Only System?'
+				return True
 			return True
 		else:
 			return False

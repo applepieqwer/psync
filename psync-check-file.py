@@ -4,7 +4,7 @@ from psync import psyncFileLib
 
 p = psyncFileLib()
 p.selectLocal()
-for f in p.listFileByDistribute(selected_distribute,file_only=True):
+for f in p.listFileByDistribute(p.selected_local,file_only=True):
 	print 'checking %d'%f['fid']
 	try:
 		r = f.disk_hash_check()
