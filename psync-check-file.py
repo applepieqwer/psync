@@ -3,7 +3,6 @@
 from psync import psyncFileLib
 
 p = psyncFileLib()
-p.selectLocal()
 for f in p.listFileByDistribute(p.selected_local,file_only=True):
 	print 'checking %d'%f['fid']
 	try:
