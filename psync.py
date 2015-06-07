@@ -447,7 +447,7 @@ class psyncFile():
 
 class psyncFileLib():
 	#///////////////初始化////////////////////////
-	psync_host = '192.168.1.1'
+	psync_host = 'applepie-atom.lan'
 	psync_user = 'psync'
 	psync_pass = '123456'
 	psync_db = 'psync'
