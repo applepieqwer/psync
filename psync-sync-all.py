@@ -3,6 +3,7 @@
 from psync import psyncFileLib
 
 p = psyncFileLib()
+p.selectLocal()
 p.selectDistribute()
 print "将\"%s\"的文件同步到\"%s\"？"%(p.distribute[p.selected_local]['distname'].encode('utf8'),p.distribute[p.selected_distribute['did']]['distname'].encode('utf8'))
 if raw_input('Select Y or n: ') == 'Y':
