@@ -1,0 +1,7 @@
+sudo apt-get install vsftpd python-mysqldb python-pyexiv2 wput
+sudo vi /etc/vsftpd.conf
+将vsftpd.conf中anonymous_enable=NO，local_enable=YES，write_enable=YES
+sudo service vsftpd restart
+从百度云中下载git-pip.py安装pip
+sudo pip install skylark
+运行psync-mkdir.sh创建基础目录
