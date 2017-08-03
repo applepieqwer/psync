@@ -3,13 +3,12 @@ from mimetypes import guess_type
 from os import lstat
 
 def typefile(filename):
-	return guess_type(pathname2url(filename))[0]
+	return guess_type(pathname2url(filename.encode('utf-8')))[0]
 
 #find the type of file
 #find obj['src'] or die, if obj['fhash'] not set, then todo hash
 # obj['ftype'] --------the mimetype of file
 # obj['filetime'] -----------the file change time
-# obj['todo'] = 'mysql'  ---------next todo is let mysql make fid
 
 
 def do(obj,Config):

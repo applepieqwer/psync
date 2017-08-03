@@ -37,7 +37,10 @@ if __name__ == '__main__':
 						if f.endswith(Config.get('endswith')):
 							MainList.append(dict(mission='import', src=f, filename=fname))
 		else:
-			sleep(1)
+			MainListLen = MainList.length()
+			if MainListLen < 10:
+				MainList.append(dict(mission='lazycheck'))
+			sleep(5 * MainListLen + 1)
 
 	
 	

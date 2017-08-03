@@ -20,8 +20,8 @@ if __name__ == '__main__':
 	
 	Config = ConfigClass()
 	Config['endswith'] = ('.jpg','.JPG','.jpeg','.JPEG')
-	Config['search_root'] = '/home/applepie/Data/psync/_test_'
-	Config['data_root'] = '/home/applepie/Data/psync'
+	Config['search_root'] = u'/home/applepie/Data/psync/_test_'
+	Config['data_root'] = u'/home/applepie/Data/psync'
 	Config['did'] = 4
 	Config['distname'] = 'mainServer'
 	Config['disttype'] = 'full'

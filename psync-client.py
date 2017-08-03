@@ -35,7 +35,9 @@ def main():
 	init_db(Config)
 	
 	#define Mission roadmap
-	Mission = { 'import' : [ 'fhash' , 'ftype' , 'fid' , 'debug'] }
+	Mission = { 
+	'import' : [ 'fhash' , 'ftype' , 'fid' , 'distribute' , 'debug'] , 
+	'lazycheck' : ['fid' , 'distribute' , 'fhash' , 'distribute' , 'debug']}
 
 	#loop
 	while True:

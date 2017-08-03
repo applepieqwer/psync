@@ -59,10 +59,29 @@ def old_fid(obj,Config):
 		raise UserWarning('fid %d not found'%obj['fid'])
 		return obj
 
+def rand_fid(obj,Config):
+	sql = "SELECT * FROM `file` ORDER BY RAND() LIMIT 1"
+	debuglog(sql)
+	cur.execute(sql)
+	rss = cur.fetchall() 
+	if len(rss) > 0:
+		debuglog('fid found')
+		obj.update(file_sql2obj(rss[0]))
+		return obj
+	else:
+		debuglog('fid not found')
+		raise UserWarning('fid %d not found'%obj['fid'])
+		return obj
+
 def do(obj,Config):
 	mission = obj['mission']
 	if mission == 'import':
 		if not obj.has_key('fid'):
 			return new_fid(obj,Config)
+		else:
+			return old_fid(obj,Config)
+	if mission == 'lazycheck':
+		if not obj.has_key('fid'):
+			return rand_fid(obj,Config)
 		else:
 			return old_fid(obj,Config)
