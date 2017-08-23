@@ -38,9 +38,12 @@ if __name__ == '__main__':
 							MainList.append(dict(mission='import', src=f, filename=fname))
 		else:
 			MainListLen = MainList.length()
+			print 'psync-search: Search(%d)/MainList(%d)'%(L2S.length(),MainListLen)
 			if MainListLen < 10:
 				MainList.append(dict(mission='lazycheck'))
-			sleep(15 * MainListLen + 1)
+			sl = 15 * MainListLen + 1
+			print 'psync-search: Sleeping %d sec(s)'%(sl)
+			sleep(sl)
 
 	
 	

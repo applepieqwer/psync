@@ -18,7 +18,7 @@ def init_db(Config):
 		debuglog('Database %s ready.'%mysql_host)
 		#update server stat here
 	except Exception as e:
-		debuglog("Mysql Error %d: %s" % (e.args[0], e.args[1]))
+		debuglog("Mysql Init Error ")
 		raise e
 
 def main():

@@ -19,8 +19,8 @@ if __name__ == '__main__':
 	MainList = ListClass() # main list
 	
 	Config = ConfigClass()
-	Config['endswith'] = ('.jpg','.JPG','.jpeg','.JPEG')
-	Config['search_root'] = u'/home/applepie/Data/psync/_test_'
+	Config['endswith'] = ('.jpg','.JPG','.jpeg','.JPEG','mp4','MP4','mov','MOV')
+	Config['search_root'] = u'/home/applepie/Data/psync/import_root'
 	Config['data_root'] = u'/home/applepie/Data/psync'
 	Config['did'] = 4
 	Config['distname'] = 'mainServer'
