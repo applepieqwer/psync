@@ -10,7 +10,7 @@ class MyManager(BaseManager):
 def init_db(Config):
 	#connect the database
 	try:
-		if not 'db' in dir(__builtin__) or not __builtin__.db.open:
+		if not 'db' in dir(__builtin__):
 			mysql_host = Config.read('mysql_host')
 			debuglog('Database %s connecting.'%mysql_host)
 			__builtin__.db = MySQLdb.connect(host=mysql_host,user=Config.read('mysql_user'),passwd=Config.read('mysql_passwd'),db=Config.read('mysql_db'),charset='utf8')
@@ -53,6 +53,8 @@ def main():
 						obj['doing'] = todo
 						auto_module = __import__('psync-mod-%s'%todo)
 						obj = auto_module.do(obj,Config)
+						__builtin__.db.ping()
+						__builtin__.db.commit()
 						#the result obj "r" is reload to MainList
 					except ImportError:
 						debuglog('ERROR: %s module not found'%todo)
@@ -84,5 +86,4 @@ if __name__ == '__main__':
 		main()
 	except KeyboardInterrupt:
 		print 'KeyboardInterrupt'
-		db.commit()
-		db.close()
+		__builtin__.db.close()
