@@ -18,7 +18,7 @@ def init_db(Config):
 		debuglog('Database %s ready.'%mysql_host)
 		#update server stat here
 	except Exception as e:
-		print debuglog('Database Error:',mysql_host)
+		debuglog("Mysql Error %d: %s" % (e.args[0], e.args[1]))
 		raise e
 
 def main():
@@ -55,17 +55,24 @@ def main():
 						obj = auto_module.do(obj,Config)
 						#the result obj "r" is reload to MainList
 					except ImportError:
-						print debuglog('ERROR: %s module not found'%todo)
+						debuglog('ERROR: %s module not found'%todo)
 						print obj
 						print 'DUMP DONE'
 					except UserWarning,e:
-						print debuglog('MOD %s WARNING:%s'%(todo,e))
+						debuglog('MOD %s WARNING:%s'%(todo,e))
 						print obj
 						print 'DUMP DONE'
 					except MySQLdb.Error,e:
-						print debuglog("Mysql Error %d: %s" % (e.args[0], e.args[1]))
-						print obj
-						print 'DUMP DONE'
+						if e.args[0] == 2006:
+							#connection lost ,re-connect
+							debuglog("Re-Connect to database")
+							init_db(Config)
+							#send obj back to MainList
+							MainList.append(obj)
+						else:
+							debuglog("Mysql Error %d: %s" % (e.args[0], e.args[1]))
+							print obj
+							print 'DUMP DONE'
 		else:
 			sleep(3)
 

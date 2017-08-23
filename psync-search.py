@@ -40,7 +40,7 @@ if __name__ == '__main__':
 			MainListLen = MainList.length()
 			if MainListLen < 10:
 				MainList.append(dict(mission='lazycheck'))
-			sleep(5 * MainListLen + 1)
+			sleep(15 * MainListLen + 1)
 
 	
 	

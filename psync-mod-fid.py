@@ -60,17 +60,17 @@ def old_fid(obj,Config):
 		return obj
 
 def rand_fid(obj,Config):
-	sql = "SELECT * FROM `file` ORDER BY RAND() LIMIT 1"
+	sql = "SELECT `fid` from `file_distribute` WHERE `did`='%d' ORDER BY `dtime` LIMIT 1"%(Config.read('did')) 
 	debuglog(sql)
 	cur.execute(sql)
 	rss = cur.fetchall() 
 	if len(rss) > 0:
-		debuglog('fid found')
-		obj.update(file_sql2obj(rss[0]))
-		return obj
+		debuglog('rand fid found')
+		obj['fid'] = rss[0]['fid']
+		return old_fid(obj,Config)
 	else:
-		debuglog('fid not found')
-		raise UserWarning('fid %d not found'%obj['fid'])
+		debuglog('rand fid not found')
+		raise UserWarning('fid not found')
 		return obj
 
 def do(obj,Config):
