@@ -39,10 +39,11 @@ if __name__ == '__main__':
 		else:
 			MainListLen = MainList.length()
 			print 'psync-search: Search(%d)/MainList(%d)'%(L2S.length(),MainListLen)
-			if MainListLen < 10:
+			while MainListLen < 10:
 				print 'psync-search: Lazycheck.....+1.'
 				MainList.append(dict(mission='lazycheck'))
-			sl = 15 * MainListLen + 1
+				MainListLen = MainListLen + 1
+			sl = 60
 			print 'psync-search: Sleeping %d sec(s)'%(sl)
 			sleep(sl)
 
