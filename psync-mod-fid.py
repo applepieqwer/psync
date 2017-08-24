@@ -1,6 +1,9 @@
 import MySQLdb
 from psync_func import dict2insert,debuglog
 from base64 import b64encode,b64decode
+from time import sleep
+from random import randint
+
 #for mission == 'import':
 #find fid with fhash file
 #if fid is set ,then read file info from db with fid
@@ -60,7 +63,9 @@ def old_fid(obj,Config):
 		return obj
 
 def rand_fid(obj,Config):
-	sql = "SELECT `fid` from `file_distribute` WHERE `did`='%d' ORDER BY `dtime` LIMIT 1"%(Config.read('did')) 
+	#sleep rand time for sql server cool down
+	sleep(randint(0,5))
+	sql = "SELECT `fid` from `file_distribute` WHERE `did`='%d' ORDER BY `dtime` LIMIT %d,1"%(Config.read('did'),randint(0,9)) 
 	debuglog(sql)
 	cur.execute(sql)
 	rss = cur.fetchall() 
