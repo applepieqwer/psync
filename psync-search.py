@@ -20,6 +20,7 @@ if __name__ == '__main__':
 	L2S = manager.List2Search()
 	MainList = manager.MainList()
 	Config = manager.Config()
+	LastLen = 0
 	while True:
 		if L2S.length():
 			d = L2S.popleft()
@@ -39,11 +40,15 @@ if __name__ == '__main__':
 		else:
 			MainListLen = MainList.length()
 			print 'psync-search: Search(%d)/MainList(%d)'%(L2S.length(),MainListLen)
-			while MainListLen < 30:
+			while MainListLen * 2 - LastLen < 10:
 				print 'psync-search: Lazycheck.....+1.'
 				MainList.append(dict(mission='lazycheck'))
 				MainListLen = MainListLen + 1
-			sl = 60
+				print 'psync-search: Lazytag.....+1.'
+				MainList.append(dict(mission='lazytag'))
+				MainListLen = MainListLen + 1
+			sl = 30
+			LastLen = MainListLen
 			print 'psync-search: Sleeping %d sec(s)'%(sl)
 			sleep(sl)
 

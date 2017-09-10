@@ -7,6 +7,7 @@ import os
 # obj['fhash'] --------the sha1 hash of file
 
 def do_sha1(s):
+	debuglog('hashing...')
 	read_size = 1024
 	sha1Obj = sha1()
 	with open(s,'rb') as f:
@@ -26,6 +27,8 @@ def new_fhash(obj,Config):
 	return obj
 
 def old_fhash(obj,Config):
+	if obj.has_key('fhashcheck'):
+		return obj
 	if not obj.has_key('fhash'):
 		raise UserWarning,'fhash not set'
 		return obj
@@ -42,8 +45,8 @@ def old_fhash(obj,Config):
 
 def do(obj,Config):
 	mission = obj['mission']
-	if mission == 'import':
+	if mission in ['import']:
 		return new_fhash(obj,Config)
-	if mission == 'lazycheck':
+	if mission in ['lazytag','lazycheck']:
 		return old_fhash(obj,Config)
 	return obj

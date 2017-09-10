@@ -77,9 +77,9 @@ def check_did(obj,Config):
 
 def do(obj,Config):
 	mission = obj['mission']
-	if mission == 'import':
+	if mission in ['import']:
 		obj = read_did(obj,Config)
 		return import_did(obj,Config)
-	if mission == 'lazycheck':
+	if mission in ['lazytag','lazycheck']:
 		return check_did(obj,Config)
 
