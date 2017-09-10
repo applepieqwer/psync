@@ -65,7 +65,7 @@ def old_fid(obj,Config):
 def rand_fid(obj,Config):
 	#sleep rand time for sql server cool down
 	sleep(randint(0,5))
-	sql = "SELECT `fid` from `file_distribute` WHERE `did`='%d' ORDER BY `dtime` DESC LIMIT %d,1"%(Config.read('did'),randint(0,9)) 
+	sql = "SELECT `fid` from `file_distribute` WHERE `did`='%d' ORDER BY `dtime` LIMIT %d,1"%(Config.read('did'),randint(0,9)) 
 	debuglog(sql)
 	cur.execute(sql)
 	rss = cur.fetchall() 
