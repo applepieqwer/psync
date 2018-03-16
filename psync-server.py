@@ -1,5 +1,6 @@
 from multiprocessing.managers import BaseManager
 from collections import deque
+from ConfigParser import ConfigParser
 
 class ListClass(deque):
 	def length(self):
@@ -15,23 +16,28 @@ class MyManager(BaseManager):
 	pass
 
 if __name__ == '__main__':
+	cp = ConfigParser()
+	cp.read('psync.conf')
+	
 	L2S = ListClass() # list to search
 	MainList = ListClass() # main list
 	
 	Config = ConfigClass()
-	Config['endswith'] = ('.jpg','.JPG','.jpeg','.JPEG','mp4','MP4','mov','MOV')
-	Config['search_root'] = u'/home/applepie/Data/psync/import_root'
-	Config['data_root'] = u'/home/applepie/Data/psync'
-	Config['did'] = 4
-	Config['distname'] = 'mainServer'
-	Config['disttype'] = 'full'
-	Config['diststate'] = 'ready'
-	Config['distserver'] = 'http://applepie-daan.f3322.net/'
+	Config['endswith'] = eval(cp.get('psync_config','endswith'))
+	Config['search_root'] = cp.get('psync_config','search_root')
+	Config['data_root'] = cp.get('psync_config','data_root')
+	Config['did'] = cp.getint('psync_config','did')
+	Config['distname'] = cp.get('psync_config','distname')
+	Config['disttype'] = cp.get('psync_config','disttype')
+	Config['diststate'] = cp.get('psync_config','diststate')
+	Config['distserver'] = cp.get('psync_config','distserver')
 
-	Config['mysql_host'] = 'psync.db.6677333.hostedresource.com'
-	Config['mysql_user'] = 'psync'
-	Config['mysql_passwd'] = 'V79762psync!1'
-	Config['mysql_db'] = 'psync'
+	Config['mysql_host'] = cp.get('psync_config','mysql_host')
+	Config['mysql_user'] = cp.get('psync_config','mysql_user')
+	Config['mysql_passwd'] = cp.get('psync_config','mysql_passwd')
+	Config['mysql_db'] = cp.get('psync_config','mysql_db')
+
+	print Config['endswith']
 
 	L2S.append(Config['search_root'])
 
