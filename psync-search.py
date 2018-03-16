@@ -42,11 +42,11 @@ if __name__ == '__main__':
 			print 'psync-search: Search(%d)/MainList(%d)'%(L2S.length(),MainListLen)
 			d = LastLen - MainListLen
 			while MainListLen * 2 - LastLen < 10:
-				print 'psync-search: Lazycheck.....+1.'
-				MainList.append(dict(mission='lazycheck'))
-				MainListLen = MainListLen + 1
-				print 'psync-search: Lazytag.....+1.'
-				MainList.append(dict(mission='lazytag'))
+				#print 'psync-search: Lazycheck.....+1.'
+				#MainList.append(dict(mission='lazycheck'))
+				#MainListLen = MainListLen + 1
+				print 'psync-search: Convert.....+1.'
+				MainList.append(dict(mission='convert'))
 				MainListLen = MainListLen + 1
 			sl = 30
 			if d > 0:

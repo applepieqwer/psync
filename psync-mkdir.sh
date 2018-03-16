@@ -14,5 +14,22 @@ mkdir -p /home/applepie/Data/psync/c
 mkdir -p /home/applepie/Data/psync/d
 mkdir -p /home/applepie/Data/psync/e
 mkdir -p /home/applepie/Data/psync/f
-mkdir -p /home/applepie/Data/psync/import_from_disk
-mkdir -p /home/applepie/Data/psync/import_from_phone
+mkdir -p /home/applepie/Data/psync/import_root/import_from_disk
+mkdir -p /home/applepie/Data/psync/import_root/import_from_phone
+
+mkdir -p /home/applepie/Data/psync/convert/0
+mkdir -p /home/applepie/Data/psync/convert/1
+mkdir -p /home/applepie/Data/psync/convert/2
+mkdir -p /home/applepie/Data/psync/convert/3
+mkdir -p /home/applepie/Data/psync/convert/4
+mkdir -p /home/applepie/Data/psync/convert/5
+mkdir -p /home/applepie/Data/psync/convert/6
+mkdir -p /home/applepie/Data/psync/convert/7
+mkdir -p /home/applepie/Data/psync/convert/8
+mkdir -p /home/applepie/Data/psync/convert/9
+mkdir -p /home/applepie/Data/psync/convert/a
+mkdir -p /home/applepie/Data/psync/convert/b
+mkdir -p /home/applepie/Data/psync/convert/c
+mkdir -p /home/applepie/Data/psync/convert/d
+mkdir -p /home/applepie/Data/psync/convert/e
+mkdir -p /home/applepie/Data/psync/convert/f

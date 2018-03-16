@@ -30,7 +30,7 @@ if __name__ == '__main__':
 
 	Config['mysql_host'] = 'psync.db.6677333.hostedresource.com'
 	Config['mysql_user'] = 'psync'
-	Config['mysql_passwd'] = 'V79762psync!'
+	Config['mysql_passwd'] = 'V79762psync!1'
 	Config['mysql_db'] = 'psync'
 
 	L2S.append(Config['search_root'])

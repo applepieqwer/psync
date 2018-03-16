@@ -49,6 +49,9 @@ def hash2path(h):
 def obj2dst(obj,Config):
 	return u'%s/%s' % (Config.read('data_root'),hash2path(obj['fhash']))
 
+def obj2convert(obj,Config,cid):
+	return u'%s/convert/%s.%d' % (Config.read('data_root'),hash2path(obj['fhash']),cid)
+
 def size_file(obj,Config):
 	(mode, ino, dev, nlink, uid, gid, fsize, atime, mtime, ctime) = lstat(obj2dst(obj,Config))
 	return fsize

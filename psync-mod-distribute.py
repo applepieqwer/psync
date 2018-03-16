@@ -80,6 +80,6 @@ def do(obj,Config):
 	if mission in ['import']:
 		obj = read_did(obj,Config)
 		return import_did(obj,Config)
-	if mission in ['lazytag','lazycheck']:
+	if mission in ['lazytag','lazycheck','convert']:
 		return check_did(obj,Config)
 

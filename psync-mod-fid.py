@@ -56,6 +56,7 @@ def old_fid(obj,Config):
 	if len(rss) > 0:
 		debuglog('fid found')
 		obj.update(file_sql2obj(rss[0]))
+		print obj
 		return obj
 	else:
 		debuglog('fid not found')
@@ -85,7 +86,7 @@ def do(obj,Config):
 			return new_fid(obj,Config)
 		else:
 			return old_fid(obj,Config)
-	if mission in ['lazytag','lazycheck']:
+	if mission in ['lazytag','lazycheck','convert']:
 		if not obj.has_key('fid'):
 			return rand_fid(obj,Config)
 		else:
