@@ -37,8 +37,6 @@ if __name__ == '__main__':
 	Config['mysql_passwd'] = cp.get('psync_config','mysql_passwd')
 	Config['mysql_db'] = cp.get('psync_config','mysql_db')
 
-	print Config['endswith']
-
 	L2S.append(Config['search_root'])
 
 	MyManager.register('List2Search',callable=lambda:L2S)

@@ -46,11 +46,14 @@ def obj_is_here(obj,Config):
 def hash2path(h):
 	return u'%s/%s' % (h[0], h)
 
+def convert2path(h,cid):
+	return u'convert/%s.%d' % (hash2path(h),cid)
+
 def obj2dst(obj,Config):
 	return u'%s/%s' % (Config.read('data_root'),hash2path(obj['fhash']))
 
 def obj2convert(obj,Config,cid):
-	return u'%s/convert/%s.%d' % (Config.read('data_root'),hash2path(obj['fhash']),cid)
+	return u'%s/%s' % (Config.read('data_root'),convert2path(obj['fhash'],cid))
 
 def size_file(obj,Config):
 	(mode, ino, dev, nlink, uid, gid, fsize, atime, mtime, ctime) = lstat(obj2dst(obj,Config))

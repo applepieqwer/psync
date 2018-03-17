@@ -1,4 +1,4 @@
-from psync_func import obj2dst,obj2convert,debuglog
+from psync_func import obj2dst,obj2convert,convert2path,debuglog
 import os
 
 #convert file
@@ -39,7 +39,7 @@ def update_cid(obj,Config):
 	else:
 		did = Config.read('did')
 		for cid in obj['cid']:
-			sql = "REPLACE INTO `file_converter` (`fid`,`cid`,`did`,`result`) VALUES (%s,%s,%s,'%s')"%(obj['fid'],cid,did,obj2convert(obj,Config,cid))
+			sql = "REPLACE INTO `file_converter` (`fid`,`cid`,`did`,`result`) VALUES (%s,%s,%s,'%s')"%(obj['fid'],cid,did,convert2path(obj['fhash'],cid))
 			debuglog(sql)
 			cur.execute(sql)
 			db.commit()
