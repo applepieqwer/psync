@@ -6,7 +6,7 @@ import os
 # obj['cid'] 
 
 def do_convert(cmd,s,d):
-	cmd = cmd.replace('{SRC}',s).replace('{DST}',d)
+	cmd = cmd.replace('{SRC}',s).replace('{TARGET}',d)
 	debuglog(cmd)
 	return os.system(cmd)
 
@@ -39,7 +39,11 @@ def update_cid(obj,Config):
 	else:
 		did = Config.read('did')
 		for cid in obj['cid']:
-			sql = "REPLACE INTO `file_converter` (`fid`,`cid`,`did`,`result`) VALUES (%s,%s,%s,'%s')"%(obj['fid'],cid,did,convert2path(obj['fhash'],cid))
+			sql = "SELECT `ctarget` FROM `converter` WHERE `cid` = %d "%cid
+			debuglog(sql)
+			cur.execute(sql)
+			ctarget = cur.fetchone()['ctarget']
+			sql = "REPLACE INTO `file_converter` (`fid`,`cid`,`did`,`result`) VALUES (%s,%s,%s,'%s')"%(obj['fid'],cid,did,convert2path(obj['fhash'],cid,ctarget))
 			debuglog(sql)
 			cur.execute(sql)
 			db.commit()
@@ -51,17 +55,19 @@ def check_cid(obj,Config):
 		raise UserWarning,'cid not set'
 		return obj
 	else:
-		sql = "SELECT `cid`,`cvalue` FROM `converter` WHERE `ctype` = '%s' "%obj['ftype']
+		sql = "SELECT `cid`,`cvalue`,`ctarget` FROM `converter` WHERE `ctype` = '%s' "%obj['ftype']
 		debuglog(sql)
 		cur.execute(sql)
 		rss = cur.fetchall()
 		for rs in rss:
 			cid = rs['cid']
+			ctarget = rs['ctarget']
+			convert_target = obj2convert(obj,Config,cid,ctarget)
 			if cid in obj['cid']:
-				if not os.path.isfile(obj2convert(obj,Config,cid)):
-					cmd = do_convert(rs['cvalue'],obj2dst(obj,Config),obj2convert(obj,Config,cid))
+				if not os.path.isfile(convert_target):
+					cmd = do_convert(rs['cvalue'],obj2dst(obj,Config),convert_target)
 			else:
-				cmd = do_convert(rs['cvalue'],obj2dst(obj,Config),obj2convert(obj,Config,cid))
+				cmd = do_convert(rs['cvalue'],obj2dst(obj,Config),convert_target)
 				obj['cid'].append(cid)
 		return obj
 
