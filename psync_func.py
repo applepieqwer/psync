@@ -2,6 +2,7 @@ import MySQLdb
 from os import getpid,remove,lstat
 import os
 import exifread as exifreader
+import __builtin__
 
 #from shutil import copy2 as shutil_move
 from shutil import move as shutil_move
@@ -31,6 +32,9 @@ def readEXIF(obj,Config,tag):
 	else:
 		debuglog(u'EXIF: \'%s\' not found in %s'%(tag,obj['fhash']))
 		return False
+
+def obj_is_video(obj,Config):
+	return (obj['ftype'][:5] == 'video')
 
 def obj_is_here(obj,Config):
 	if 'did' in obj.keys():
@@ -93,3 +97,19 @@ def debuglog(msg):
 	if debug_switch:
 		print 'debuglog[%s/%s]: %s'%(client_id,mod_name,msg)
 	return msg
+
+def init_db(Config):
+	#connect the database
+	try:
+		mysql_host = Config.read('mysql_host')
+		debuglog('Database %s connecting.'%mysql_host)
+		__builtin__.db = MySQLdb.connect(host=mysql_host,user=Config.read('mysql_user'),passwd=Config.read('mysql_passwd'),db=Config.read('mysql_db'),charset='utf8')
+		__builtin__.cur = db.cursor(cursorclass = MySQLdb.cursors.DictCursor) 	
+		debuglog('Database %s ready.'%mysql_host)
+		#update server stat here
+	except MySQLdb.Error,e:
+		debuglog("Mysql Init Error ")
+		exit(-1)
+
+def halt_db(Config):
+	__builtin__.db.close()

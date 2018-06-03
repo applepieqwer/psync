@@ -1,14 +1,21 @@
-from psync_func import obj2dst,obj2convert,convert2path,debuglog
+from psync_func import obj2dst,obj2convert,convert2path,debuglog,obj_is_video,halt_db,init_db
 import os
 
 #convert file
 #check cid , run convert cmd and update cid
 # obj['cid'] 
 
-def do_convert(cmd,s,d):
+def do_convert(cmd,obj,Config,d):
+	s = obj2dst(obj,Config)
 	cmd = cmd.replace('{SRC}',s).replace('{TARGET}',d)
 	debuglog(cmd)
-	return os.system(cmd)
+	if obj_is_video(obj,Config):
+		halt_db(Config)
+		r = os.system(cmd)
+		init_db(Config)
+		return r
+	else:
+		return os.system(cmd)
 
 
 def read_cid(obj,Config):
@@ -63,11 +70,9 @@ def check_cid(obj,Config):
 			cid = rs['cid']
 			ctarget = rs['ctarget']
 			convert_target = obj2convert(obj,Config,cid,ctarget)
-			if cid in obj['cid']:
-				if not os.path.isfile(convert_target):
-					cmd = do_convert(rs['cvalue'],obj2dst(obj,Config),convert_target)
-			else:
-				cmd = do_convert(rs['cvalue'],obj2dst(obj,Config),convert_target)
+			if not os.path.isfile(convert_target):
+				cmd = do_convert(rs['cvalue'],obj,Config,convert_target)
+			if cid not in obj['cid']:
 				obj['cid'].append(cid)
 		return obj
 

@@ -1,24 +1,11 @@
 import MySQLdb
 from multiprocessing.managers import BaseManager
 from time import sleep
-from psync_func import debuglog,debugset
+from psync_func import debuglog,debugset,halt_db,init_db
 import __builtin__
 
 class MyManager(BaseManager):
 	pass
-
-def init_db(Config):
-	#connect the database
-	try:
-		mysql_host = Config.read('mysql_host')
-		debuglog('Database %s connecting.'%mysql_host)
-		__builtin__.db = MySQLdb.connect(host=mysql_host,user=Config.read('mysql_user'),passwd=Config.read('mysql_passwd'),db=Config.read('mysql_db'),charset='utf8')
-		__builtin__.cur = db.cursor(cursorclass = MySQLdb.cursors.DictCursor) 	
-		debuglog('Database %s ready.'%mysql_host)
-		#update server stat here
-	except MySQLdb.Error,e:
-		debuglog("Mysql Init Error ")
-		exit(-1)
 
 def main():
 	debugset('main')

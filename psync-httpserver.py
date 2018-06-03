@@ -15,9 +15,10 @@ DEFAULT_PORT = 80
 class RequestHandler(SimpleHTTPRequestHandler):
 	def end_headers(self):
 		query_components = parse_qs(urlparse(self.path).query)
-		v = query_components['t'][0]
-		print v
-		self.send_header('Content-Type',v)
+		if 't' in query_components.keys():
+			v = query_components['t'][0]
+			print v
+			self.send_header('Content-Type',v)
 		SimpleHTTPRequestHandler.end_headers(self)
 
 
