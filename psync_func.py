@@ -8,6 +8,10 @@ from hashlib import sha1
 #from shutil import copy2 as shutil_move
 from shutil import move as shutil_move
 
+class ConfigClass(dict):
+	def read(self,key):
+		return self.get(key)
+
 def do_sha1(s):
 	debuglog('hashing...')
 	if not os.path.isfile(s):

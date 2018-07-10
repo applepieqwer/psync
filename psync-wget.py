@@ -4,6 +4,7 @@ from json import loads as jsonDecode
 import urllib2
 import os
 from psync_func import obj2dst,obj2convert,do_sha1,hash2path
+from psync_func import ConfigClass
 from time import sleep
 
 def makePost(fhash,Config):
@@ -27,10 +28,10 @@ def goHash(job,Config):
 def main():
 	cp = ConfigParser()
 	cp.read('psync.conf')
-	Config = {}
+	Config = ConfigClass()
 	Config['data_root'] = cp.get('psync_config','data_root')
 	Config['did'] = cp.getint('psync_config','did')
-	Config['jobs_url'] = cp.get('psync_config','jobs_url')
+	Config['jobs_url'] = cp.get('psync_wget_config','jobs_url')
 
 	fhash_array = {}
 	while True:

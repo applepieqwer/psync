@@ -1,16 +1,13 @@
 from multiprocessing.managers import BaseManager
 from collections import deque
 from ConfigParser import ConfigParser
+from psync_func import ConfigClass
 
 class ListClass(deque):
 	def length(self):
 		return len(self)
 	def __str__(self):
 		return super().__str__(self)
-
-class ConfigClass(dict):
-	def read(self,key):
-		return self.get(key)
 
 class MyManager(BaseManager):
 	pass
