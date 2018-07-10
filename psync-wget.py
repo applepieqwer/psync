@@ -16,7 +16,7 @@ def sendPost(data,Config):
 	return jsonDecode(response.read())
 
 def goJob(job,Config):
-	cmd = 'wget -c -o \'%s/%s\' \'%s\''%(job['url'],hash2path(job['fhash']),obj2dst({'fhash':job['fhash']},Config))
+	cmd = 'wget -c -o \'%s/%s\' \'%s\''%(job['distserver'],hash2path(job['fhash']),obj2dst({'fhash':job['fhash']},Config))
 	print cmd
 	#os.system(cmd)
 
@@ -40,8 +40,8 @@ def main():
 		print r
 		fhash_array = {}
 		for job in r['jobs']:
-			goJob(job)
-			if job['fhash'] != goHash(job):
+			goJob(job,Config)
+			if job['fhash'] != goHash(job,Config):
 				pass
 				#os.remove(obj2dst({'fhash':job['fhash']},Config))
 		sleep(1)
