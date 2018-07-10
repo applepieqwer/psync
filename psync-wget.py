@@ -8,7 +8,7 @@ from psync_func import ConfigClass
 from time import sleep
 
 def makePost(fhash,Config):
-	return jsonEncode({'did':Config['did'],'fhash':fhash})
+	return jsonEncode({'did':Config['did'],'fhash_array':fhash})
 
 def sendPost(data,Config):
 	headers = {'Content-Type': 'application/json'}
@@ -17,9 +17,9 @@ def sendPost(data,Config):
 	return jsonDecode(response.read())
 
 def goJob(job,Config):
-	cmd = 'wget -c -o \'%s/%s\' \'%s\''%(job['distserver'],hash2path(job['fhash']),obj2dst({'fhash':job['fhash']},Config))
+	cmd = 'wget -c -O \'%s\' \'%s/%s\''%(obj2dst({'fhash':job['fhash']},Config),job['distserver'],hash2path(job['fhash']))
 	print cmd
-	#os.system(cmd)
+	os.system(cmd)
 
 def goHash(job,Config):
 	return do_sha1(obj2dst({'fhash':job['fhash']},Config))
@@ -38,13 +38,13 @@ def main():
 		r = makePost(fhash_array,Config)
 		print r
 		r = sendPost(r,Config)
-		print r
 		fhash_array = {}
 		for job in r['jobs']:
 			goJob(job,Config)
 			if job['fhash'] != goHash(job,Config):
-				pass
-				#os.remove(obj2dst({'fhash':job['fhash']},Config))
+				os.remove(obj2dst({'fhash':job['fhash']},Config))
+			else:
+				fhash_array.append(job['fhash'])
 		sleep(1)
 
 
