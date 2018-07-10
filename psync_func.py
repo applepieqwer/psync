@@ -91,6 +91,7 @@ def move_file(obj,Config):
 	dst = obj2dst(obj,Config)
 	debuglog(u'moving %s \n=====> %s'%(obj['src'],dst))
 	shutil_move(obj['src'],dst)
+	os.chmod(dst, 0644)
 	obj['dst']=dst
 	return obj
 
