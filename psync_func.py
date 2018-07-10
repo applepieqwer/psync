@@ -3,9 +3,23 @@ from os import getpid,remove,lstat
 import os
 import exifread as exifreader
 import __builtin__
+from hashlib import sha1
 
 #from shutil import copy2 as shutil_move
 from shutil import move as shutil_move
+
+def do_sha1(s):
+	debuglog('hashing...')
+	if not os.path.isfile(s):
+		return ''
+	read_size = 1024
+	sha1Obj = sha1()
+	with open(s,'rb') as f:
+		data = f.read(read_size)
+		while data:
+			sha1Obj.update(data)
+			data = f.read(read_size)
+		return sha1Obj.hexdigest()
 
 def readEXIFwidth(obj,Config):
 	return readEXIF(obj,Config,'EXIF ExifImageWidth')

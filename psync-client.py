@@ -25,7 +25,7 @@ def main():
 	'import' :    [ 'fhash' , 'ftype' , 'fid' , 'distribute' , 'debug'] , 
 	'lazycheck' : ['fid' , 'distribute' , 'fhash' , 'distribute' , 'debug'] ,
 	'lazytag' :   ['fid' , 'distribute' , 'savetag' , 'debug'] ,
-	'convert' : ['fid' , 'distribute' , 'fhash' , 'distribute' , 'convert' , 'debug']}
+	'convert' : ['fid' , 'debug' , 'distribute' , 'fhash' , 'distribute' , 'convert' , 'debug']}
 
 	#loop
 	while True:
