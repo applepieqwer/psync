@@ -1,6 +1,9 @@
 from multiprocessing.managers import BaseManager
 from time import sleep
 import os
+from json import dumps as jsonEncode
+from json import loads as jsonDecode
+import urllib2
 
 class MyManager(BaseManager):
 	pass
@@ -9,10 +12,20 @@ MyManager.register('List2Search')
 MyManager.register('MainList')
 MyManager.register('Config')
 
+def load_jobs_from_url(Config):
+	#load objs form database tablename
+	#fatch fid and mission
+	headers = {'Content-Type': 'application/json'}
+	request = urllib2.Request(url=Config.get('todo_jobs_url'), headers=headers, data=jsonEncode({'did':Config.get('did')}))
+	response = urllib2.urlopen(request)
+	r = jsonDecode(response.read())
+	return r['jobs']
+
 #search and create:
 # obj['src'] ---------It is the source of file.
 # obj['filename'] ----------the filename
 # obj['mission'] ---------mission: import 
+
 
 if __name__ == '__main__':
 	manager = MyManager(address=('', 50000), authkey='1111')
@@ -42,12 +55,19 @@ if __name__ == '__main__':
 			print 'psync-search: Search(%d)/MainList(%d)'%(L2S.length(),MainListLen)
 			d = LastLen - MainListLen
 			while MainListLen * 2 - LastLen < 10:
-				print 'psync-search: Lazytag.....+1.'
-				MainList.append(dict(mission='lazytag'))
-				MainListLen = MainListLen + 1
-				print 'psync-search: Convert.....+1.'
-				MainList.append(dict(mission='convert'))
-				MainListLen = MainListLen + 1
+				todo_jobs = load_jobs_from_url(Config)
+				if len(todo_jobs) > 0:
+					for job in todo_jobs:
+						print 'psync-search: from todo_jobs/%s[%s].'%(job['fid'],job['mission'])
+						MainList.append(dict(fid=int(job['fid']),mission=job['mission']))
+						MainListLen = MainListLen + 1
+				else:
+					print 'psync-search: Lazytag.....+1.'
+					MainList.append(dict(mission='lazytag'))
+					MainListLen = MainListLen + 1
+					print 'psync-search: Convert.....+1.'
+					MainList.append(dict(mission='convert'))
+					MainListLen = MainListLen + 1
 			sl = 30
 			if d > 0:
 				eta = sl * MainListLen / d

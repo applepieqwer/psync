@@ -31,7 +31,7 @@ def main():
 	Config = ConfigClass()
 	Config['data_root'] = cp.get('psync_config','data_root')
 	Config['did'] = cp.getint('psync_config','did')
-	Config['jobs_url'] = cp.get('psync_wget_config','jobs_url')
+	Config['jobs_url'] = cp.get('psync_web_config','wget_jobs_url')
 
 	fhash_array = {}
 	while True:

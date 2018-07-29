@@ -29,6 +29,9 @@ if __name__ == '__main__':
 	Config['diststate'] = cp.get('psync_config','diststate')
 	Config['distserver'] = cp.get('psync_config','distserver')
 
+	Config['todo_jobs_url'] = cp.get('psync_web_config','todo_jobs_url')
+	Config['wget_jobs_url'] = cp.get('psync_web_config','wget_jobs_url')
+
 	Config['mysql_host'] = cp.get('psync_config','mysql_host')
 	Config['mysql_user'] = cp.get('psync_config','mysql_user')
 	Config['mysql_passwd'] = cp.get('psync_config','mysql_passwd')

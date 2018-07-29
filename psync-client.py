@@ -35,6 +35,7 @@ def main():
 				debuglog('this obj is dump')
 				continue
 			else:
+				debuglog('mission: %s'%obj['mission'])
 				for todo in Mission[obj['mission']]:
 					try:
 						debugset(todo)
