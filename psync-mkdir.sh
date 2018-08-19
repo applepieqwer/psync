@@ -33,3 +33,20 @@ mkdir -p ./convert/c
 mkdir -p ./convert/d
 mkdir -p ./convert/e
 mkdir -p ./convert/f
+
+mkdir -p ./face/0
+mkdir -p ./face/1
+mkdir -p ./face/2
+mkdir -p ./face/3
+mkdir -p ./face/4
+mkdir -p ./face/5
+mkdir -p ./face/6
+mkdir -p ./face/7
+mkdir -p ./face/8
+mkdir -p ./face/9
+mkdir -p ./face/a
+mkdir -p ./face/b
+mkdir -p ./face/c
+mkdir -p ./face/d
+mkdir -p ./face/e
+mkdir -p ./face/f

@@ -8,6 +8,19 @@ from hashlib import sha1
 #from shutil import copy2 as shutil_move
 from shutil import move as shutil_move
 
+def saveEncoding(face_data,Config):
+	filename = 'face.%d.encodings.pkl'%Config['did']
+	if not os.path.isfile(filename):
+		buf = {}
+	else:
+		readfile = open(filename, 'rb')
+		buf = pickle.load(readfile)
+		close(readfile)
+	buf.update(face_data)
+	writefile = open(filename, 'wb')
+	pickle.dump(buf,writefile,-1)
+	close(writefile)
+
 class ConfigClass(dict):
 	def read(self,key):
 		return self.get(key)
@@ -72,11 +85,17 @@ def convert2path(h,cid,ctarget=u'{DST}'):
 	d = u'convert/%s.%d' % (hash2path(h),cid)
 	return ctarget.replace('{DST}',d)
 
+def face2path(h,i=''):
+	return u'face/%s.%s.jpg' % (hash2path(h),i)
+
 def obj2dst(obj,Config):
 	return u'%s/%s' % (Config.read('data_root'),hash2path(obj['fhash']))
 
 def obj2convert(obj,Config,cid,ctarget=u'{DST}'):
 	return u'%s/%s' % (Config.read('data_root'),convert2path(obj['fhash'],cid,ctarget))
+
+def obj2face(obj,Config,i=''):
+	return u'%s/%s' % (Config.read('data_root'),face2path(obj['fhash'],i))
 
 def size_file(obj,Config):
 	(mode, ino, dev, nlink, uid, gid, fsize, atime, mtime, ctime) = lstat(obj2dst(obj,Config))
