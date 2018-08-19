@@ -4,14 +4,8 @@ from json import loads as jsonDecode
 import urllib2
 from psync_func import obj2dst,obj2face,do_sha1,hash2path,face2path,saveEncoding
 from psync_func import ConfigClass
-try:
-	import cPickle as pickle
-except:
-	import pickle
 import face_recognition
 from PIL import Image
-from base64 import b64encode
-import cStringIO
 from time import sleep
 
 def makePost(face_array,Config):
@@ -20,6 +14,7 @@ def makePost(face_array,Config):
 def sendPost(data,Config):
 	headers = {'Content-Type': 'application/json'}
 	request = urllib2.Request(url=Config['face_url'], headers=headers, data=data)
+	#request.set_proxy('172.31.1.246:8080','http')
 	response = urllib2.urlopen(request)
 	return jsonDecode(response.read())
 
@@ -33,7 +28,7 @@ def goFace(job,Config):
 	face_encodings = face_recognition.face_encodings(image,face_locations)
 	c = len(face_locations)
 	if c < 1:
-		face_data['%s-0-0-0-0'%job['fhash']]={
+		face_data['%s.0-0-0-0'%job['fhash']]={
 			'fhash':job['fhash'],
 			'face_top':0,
 			'face_right':0,
@@ -48,16 +43,17 @@ def goFace(job,Config):
 		
 		face_icon = Image.fromarray(image[top:bottom, left:right])
 		face_icon.thumbnail(size, Image.ANTIALIAS)
-		#把人脸保存到硬盘
+		
+		#save to disk
 		dst = obj2face({'fhash':job['fhash']},Config,'%d-%d-%d-%d'%(top, left, bottom, right))
 		face_icon.save(dst,'JPEG')
 		print 'face saved to %s'%(dst)
 		
-		#把图片保存到字符串
+		#save to str
 		#buffer = cStringIO.StringIO()
 		#face_icon.save(buffer, format="JPEG")
 
-		face_data['%s-%d-%d-%d-%d'%(job['fhash'], top, left, bottom, right)]={
+		face_data['%s.%d-%d-%d-%d'%(job['fhash'], top, left, bottom, right)]={
 			'fhash':job['fhash'],
 			'face_top':top,
 			'face_right':right,

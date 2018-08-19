@@ -5,6 +5,11 @@ import exifread as exifreader
 import __builtin__
 from hashlib import sha1
 
+try:
+	import cPickle as pickle
+except:
+	import pickle
+
 #from shutil import copy2 as shutil_move
 from shutil import move as shutil_move
 
@@ -15,11 +20,11 @@ def saveEncoding(face_data,Config):
 	else:
 		readfile = open(filename, 'rb')
 		buf = pickle.load(readfile)
-		close(readfile)
+		readfile.close()
 	buf.update(face_data)
 	writefile = open(filename, 'wb')
 	pickle.dump(buf,writefile,-1)
-	close(writefile)
+	writefile.close()
 
 class ConfigClass(dict):
 	def read(self,key):
