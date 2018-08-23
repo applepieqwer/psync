@@ -89,7 +89,7 @@ def main():
 					del f['face_location']
 					del f['face_encoding']
 					face_array.append(f)
-	sleep(10)
+	sleep(1)
 
 if __name__ == '__main__':
 	try:

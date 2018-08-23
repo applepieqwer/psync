@@ -22,10 +22,10 @@ def main():
 	
 	#define Mission roadmap
 	Mission = { 
-	'import' :    [ 'fhash' , 'ftype' , 'fid' , 'distribute' , 'debug'] , 
-	'lazycheck' : ['fid' , 'distribute' , 'fhash' , 'distribute' , 'debug'] ,
-	'lazytag' :   ['fid' , 'distribute' , 'savetag' , 'debug'] ,
-	'convert' : ['fid' , 'debug' , 'distribute' , 'fhash' , 'distribute' , 'convert' , 'debug']}
+	'import' :   ['fhash' , 'ftype' , 'fid' , 'distribute' , 'debug'] , 
+	'lazycheck': ['fid' , 'distribute' , 'fhash' , 'distribute' , 'debug'] ,
+	'lazytag' :  ['fid' , 'distribute' , 'fhash' , 'distribute' , 'savetag' , 'debug'] ,
+	'convert' :  ['fid' , 'distribute' , 'fhash' , 'distribute' , 'convert' , 'debug']}
 
 	#loop
 	while True:

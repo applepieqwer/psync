@@ -62,12 +62,14 @@ if __name__ == '__main__':
 						MainList.append(dict(fid=int(job['fid']),mission=job['mission']))
 						MainListLen = MainListLen + 1
 				else:
-					print 'psync-search: Lazytag.....+1.'
+					print 'psync-search: Lazytag.....+2.'
 					MainList.append(dict(mission='lazytag'))
-					MainListLen = MainListLen + 1
-					print 'psync-search: Convert.....+1.'
+					MainList.append(dict(mission='lazytag'))
+					MainListLen = MainListLen + 2
+					print 'psync-search: Convert.....+2.'
 					MainList.append(dict(mission='convert'))
-					MainListLen = MainListLen + 1
+					MainList.append(dict(mission='convert'))
+					MainListLen = MainListLen + 2
 			sl = 30
 			if d > 0:
 				eta = sl * MainListLen / d
