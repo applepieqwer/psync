@@ -15,11 +15,15 @@ MyManager.register('Config')
 def load_jobs_from_url(Config):
 	#load objs form database tablename
 	#fatch fid and mission
-	headers = {'Content-Type': 'application/json'}
-	request = urllib2.Request(url=Config.get('todo_jobs_url'), headers=headers, data=jsonEncode({'did':Config.get('did')}))
-	response = urllib2.urlopen(request)
-	r = jsonDecode(response.read())
-	return r['jobs']
+	try:
+		headers = {'Content-Type': 'application/json'}
+		request = urllib2.Request(url=Config.get('todo_jobs_url'), headers=headers, data=jsonEncode({'did':Config.get('did')}))
+		response = urllib2.urlopen(request)
+		r = jsonDecode(response.read())
+		return r['jobs']
+	except:
+		return list()
+	
 
 #search and create:
 # obj['src'] ---------It is the source of file.
