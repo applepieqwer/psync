@@ -70,9 +70,11 @@ def check_cid(obj,Config):
 			cid = rs['cid']
 			ctarget = rs['ctarget']
 			convert_target = obj2convert(obj,Config,cid,ctarget)
-			if not os.path.isfile(convert_target):
+			if cid in obj['cid']:
+				if not os.path.isfile(convert_target):
+					cmd = do_convert(rs['cvalue'],obj,Config,convert_target)
+			else:
 				cmd = do_convert(rs['cvalue'],obj,Config,convert_target)
-			if cid not in obj['cid']:
 				obj['cid'].append(cid)
 		return obj
 
