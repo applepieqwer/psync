@@ -1,4 +1,4 @@
-from psync_func import debuglog,obj_is_here,size_file,readEXIFmodel,readEXIFdate,readEXIForientation,readEXIFwidth,readEXIFheight
+from psync_func import debuglog,obj_is_here,size_file,readdate,readEXIFmodel,readEXIFdate,readEXIForientation,readEXIFwidth,readEXIFheight
 
 def sql_replace_filetagvalue(fid,tid,value):
 	sql = "REPLACE INTO `file_tag` (`fid`,`tid`,`filetagvalue`) VALUES (%s,%s,'%s')"%(fid,tid,value)
@@ -10,7 +10,7 @@ def save_tag(obj,Config):
 	if not obj_is_here(obj,Config):
 		raise UserWarning,'obj is not here'
 		return obj
-	tags_dict = [{'tid':1,'func':readEXIFdate},
+	tags_dict = [{'tid':1,'func':readdate},
 				{'tid':2,'func':readEXIFmodel},
 				{'tid':5,'func':size_file},
 				{'tid':6,'func':readEXIForientation},

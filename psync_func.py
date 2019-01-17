@@ -4,6 +4,7 @@ import os
 import exifread as exifreader
 import __builtin__
 from hashlib import sha1
+import json
 
 try:
 	import cPickle as pickle
@@ -31,7 +32,7 @@ class ConfigClass(dict):
 		return self.get(key)
 
 def do_sha1(s):
-	debuglog('hashing...')
+	debuglog('hashing...%s'%s)
 	if not os.path.isfile(s):
 		return ''
 	read_size = 1024
@@ -58,6 +59,15 @@ def readEXIFmodel(obj,Config):
 def readEXIFdate(obj,Config):
 	return readEXIF(obj,Config,'EXIF DateTimeOriginal')
 
+def readFFprobedate(obj,Config):
+	return readFFprobe(obj,Config,'creation_time')
+
+def readdate(obj,Config):
+	if obj_is_video(obj,Config):
+		return readFFprobedate(obj,Config)
+	else:
+		return readEXIFdate(obj,Config)
+
 def readEXIF(obj,Config,tag):
 	dst = obj2dst(obj,Config)
 	f = open(dst,'rb')
@@ -67,6 +77,26 @@ def readEXIF(obj,Config,tag):
 		return tags[tag]
 	else:
 		debuglog(u'EXIF: \'%s\' not found in %s'%(tag,obj['fhash']))
+		return False
+
+def FFprobeCmd(f):
+	c = 'ffprobe -v quiet -print_format json -show_format %s'%f
+	r = os.popen(c)
+	text = r.read()
+	r.close()
+	return text
+
+def readFFprobe(obj,Config,tag):
+	dst = obj2dst(obj,Config)
+	jtext = json.loads(FFprobeCmd(dst))
+	try:
+		if tag in jtext['format']['tags']:
+			return jtext['format']['tags'][tag]
+		else:
+			debuglog(u'FFprobe: \'%s\' not found in %s'%(tag,obj['fhash']))
+			return False
+	except KeyError:
+		debuglog(u'FFprobe: KeyError and \'%s\' not found in %s'%(tag,obj['fhash']))
 		return False
 
 def obj_is_video(obj,Config):
