@@ -3,6 +3,11 @@ from multiprocessing.managers import BaseManager
 from time import sleep
 from psync_func import debuglog,debugset,halt_db,init_db
 import __builtin__
+import sys
+defaultencoding = 'utf-8'
+if sys.getdefaultencoding() != defaultencoding:
+	reload(sys)
+	sys.setdefaultencoding(defaultencoding)
 
 class MyManager(BaseManager):
 	pass

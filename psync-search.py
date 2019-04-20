@@ -5,6 +5,12 @@ from json import dumps as jsonEncode
 from json import loads as jsonDecode
 import urllib2
 
+import sys
+defaultencoding = 'utf-8'
+if sys.getdefaultencoding() != defaultencoding:
+	reload(sys)
+	sys.setdefaultencoding(defaultencoding)
+
 class MyManager(BaseManager):
 	pass
 
@@ -66,10 +72,10 @@ if __name__ == '__main__':
 						MainList.append(dict(fid=int(job['fid']),mission=job['mission']))
 						MainListLen = MainListLen + 1
 				else:
-					print 'psync-search: Lazytag.....+2.'
-					MainList.append(dict(mission='lazytag'))
-					MainList.append(dict(mission='lazytag'))
-					MainListLen = MainListLen + 2
+					#print 'psync-search: Lazytag.....+2.'
+					#MainList.append(dict(mission='lazytag'))
+					#MainList.append(dict(mission='lazytag'))
+					#MainListLen = MainListLen + 2
 					print 'psync-search: Convert.....+2.'
 					MainList.append(dict(mission='convert'))
 					MainList.append(dict(mission='convert'))
