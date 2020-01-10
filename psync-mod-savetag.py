@@ -2,9 +2,7 @@ from psync_func import debuglog,obj_is_here,size_file,readdate,readEXIFmodel,rea
 
 def sql_replace_filetagvalue(fid,tid,value):
 	sql = "REPLACE INTO `file_tag` (`fid`,`tid`,`filetagvalue`) VALUES (%s,%s,'%s')"%(fid,tid,value)
-	debuglog(sql)
-	cur.execute(sql)
-	db.commit()
+	db.execute(sql)
 
 def save_tag(obj,Config):
 	if not obj_is_here(obj,Config):

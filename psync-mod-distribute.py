@@ -1,17 +1,14 @@
-import MySQLdb
 from psync_func import dict2insert,debuglog,move_file,rm_file
 
 def sql_replace_did(fid,did):
 	sql = "REPLACE INTO `file_distribute` (`fid`,`did`) VALUES (%s,%s)"%(fid,did)
-	debuglog(sql)
-	cur.execute(sql)
-	db.commit()
+	db.execute(sql)
+	
 
 def sql_delete_did(fid,did):
 	sql = "DELETE FROM `file_distribute` WHERE `file_distribute`.`fid` = %s AND `file_distribute`.`did` = %s LIMIT 1"%(fid,did)
-	debuglog(sql)
-	cur.execute(sql)
-	db.commit()
+	db.execute(sql)
+	
 
 def update_did(obj,Config):
 	if not obj.has_key('did'):
@@ -36,9 +33,7 @@ def read_did(obj,Config):
 		return obj
 	else:
 		sql = "SELECT `did` FROM `file_distribute` WHERE `fid` = %s"%obj['fid']
-		debuglog(sql)
-		cur.execute(sql)
-		rss = cur.fetchall()
+		rss = db.fetchall(sql)
 		obj['did'] = []
 		for rs in rss:
 			obj['did'].append(rs['did'])

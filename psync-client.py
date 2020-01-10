@@ -1,4 +1,3 @@
-import MySQLdb
 from multiprocessing.managers import BaseManager
 from time import sleep
 from psync_func import debuglog,debugset,halt_db,init_db
@@ -17,13 +16,13 @@ def main():
 	#make connect to python server
 	MyManager.register('MainList')
 	MyManager.register('Config')
+	MyManager.register('DB')
 
 	manager = MyManager(address=('', 50000), authkey='1111')
 	manager.connect()
 	MainList = manager.MainList()
 	Config = manager.Config()
-
-	init_db(Config)
+	__builtin__.db = manager.DB()
 	
 	#define Mission roadmap
 	Mission = { 
@@ -47,8 +46,6 @@ def main():
 						obj['doing'] = todo
 						auto_module = __import__('psync-mod-%s'%todo)
 						obj = auto_module.do(obj,Config)
-						__builtin__.db.ping()
-						__builtin__.db.commit()
 						#the result obj "r" is reload to MainList
 					except ImportError:
 						debuglog('ERROR: %s module not found'%todo)
@@ -58,17 +55,6 @@ def main():
 						debuglog('MOD %s WARNING:%s'%(todo,e))
 						print obj
 						print 'DUMP DONE'
-					except MySQLdb.Error,e:
-						if e.args[0] == 2006:
-							#send obj back to list
-							MainList.append(obj)
-							#connection lost ,re-connect
-							debuglog("Re-Connect to database")
-							init_db(Config)
-						else:
-							debuglog("Mysql Error %d: %s" % (e.args[0], e.args[1]))
-							print obj
-							print 'DUMP DONE'
 					#else:
 						#debuglog("Oops! Error!")
 						#print obj

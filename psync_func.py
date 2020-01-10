@@ -185,6 +185,7 @@ class dbClass:
 		self.database_ready = False
 		self.database_busy = False
 		self.Config = Config
+		self.init_db()
 
 	def init_db(self):
 		#connect the database
@@ -192,13 +193,15 @@ class dbClass:
 			mysql_host = self.Config.read('mysql_host')
 			debuglog('Database %s connecting.'%mysql_host)
 			self.db = MySQLdb.connect(host=mysql_host,user=self.Config.read('mysql_user'),passwd=self.Config.read('mysql_passwd'),db=self.Config.read('mysql_db'),charset='utf8')
-			self.cur = db.cursor(cursorclass = MySQLdb.cursors.DictCursor) 	
+			self.cur = self.db.cursor(cursorclass = MySQLdb.cursors.DictCursor) 	
 			debuglog('Database %s ready.'%mysql_host)
 			self.database_ready = True
 			self.database_busy = False
-		#update server stat here
 		except MySQLdb.Error,e:
-			debuglog("Mysql Init Error ")
+			try:
+				debuglog("Database Error %d:%s" % (e.args[0], e.args[1]))
+			except IndexError:
+				debuglog("MySQL Error:%s" % str(e))
 			self.database_ready = False
 			self.database_busy = False
 		
@@ -229,3 +232,30 @@ class dbClass:
 		self.db.commit()
 		self.database_busy = False
 
+	def fatchall(self,sql):
+		while not self.ready():
+			sleep(1)
+			self.init_db()
+		while self.database_busy:
+			debuglog('Database busy. Wait 5 secs.')
+			sleep(5)
+		self.database_busy = True
+		debuglog('Run SQL: %s'%sql)
+		self.cur.execute(sql)
+		r = self.cur.fatchall()
+		self.database_busy = False
+		return r
+
+	def fatchone(self,sql):
+		while not self.ready():
+			sleep(1)
+			self.init_db()
+		while self.database_busy:
+			debuglog('Database busy. Wait 5 secs.')
+			sleep(5)
+		self.database_busy = True
+		debuglog('Run SQL: %s'%sql)
+		self.cur.execute(sql)
+		r = self.cur.fatchone()
+		self.database_busy = False
+		return r

@@ -1,4 +1,4 @@
-from psync_func import obj2dst,obj2convert,convert2path,debuglog,obj_is_video,halt_db,init_db
+from psync_func import obj2dst,obj2convert,convert2path,debuglog,obj_is_video
 import os
 
 #convert file
@@ -30,9 +30,7 @@ def read_cid(obj,Config):
 		return obj
 	else:
 		sql = "SELECT `cid` FROM `file_converter` WHERE `fid` = %s and `did` = %s "%(obj['fid'],Config.read('did'))
-		debuglog(sql)
-		cur.execute(sql)
-		rss = cur.fetchall()
+		rss = db.fetchall(sql)
 		obj['cid'] = []
 		for rs in rss:
 			obj['cid'].append(rs['cid'])
@@ -47,13 +45,9 @@ def update_cid(obj,Config):
 		did = Config.read('did')
 		for cid in obj['cid']:
 			sql = "SELECT `ctarget` FROM `converter` WHERE `cid` = %d "%cid
-			debuglog(sql)
-			cur.execute(sql)
-			ctarget = cur.fetchone()['ctarget']
+			ctarget = db.fetchone(sql)['ctarget']
 			sql = "REPLACE INTO `file_converter` (`fid`,`cid`,`did`,`result`) VALUES (%s,%s,%s,'%s')"%(obj['fid'],cid,did,convert2path(obj['fhash'],cid,ctarget))
-			debuglog(sql)
-			cur.execute(sql)
-			db.commit()
+			db.execute(sql)
 		return obj
 
 def check_cid(obj,Config):
@@ -63,9 +57,7 @@ def check_cid(obj,Config):
 		return obj
 	else:
 		sql = "SELECT `cid`,`cvalue`,`ctarget` FROM `converter` WHERE `ctype` = '%s' "%obj['ftype']
-		debuglog(sql)
-		cur.execute(sql)
-		rss = cur.fetchall()
+		rss = db.fetchall(sql)
 		for rs in rss:
 			cid = rs['cid']
 			ctarget = rs['ctarget']

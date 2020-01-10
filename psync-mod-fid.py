@@ -1,4 +1,3 @@
-import MySQLdb
 from psync_func import dict2insert,debuglog
 from base64 import b64encode,b64decode
 from time import sleep
@@ -31,9 +30,7 @@ def new_fid(obj,Config):
 		return obj
 	else:
 		sql = "select * from `file` where `fhash`= '%s'"%obj['fhash']
-		debuglog(sql)
-		cur.execute(sql)
-		rss = cur.fetchall() 
+		rss = cur.fetchall(sql) 
 		if len(rss) > 0:
 			debuglog('fhash found')
 			obj.update(file_sql2obj(rss[0]))
@@ -42,17 +39,13 @@ def new_fid(obj,Config):
 			debuglog('fhash not found')
 			temp = file_obj2sql_insert(obj)
 			sql = dict2insert('file',temp) %tuple(temp.values())
-			debuglog(sql)
-			cur.execute(sql)
-			db.commit()
+			db.execute(sql)
 			obj['fid'] = int(cur.lastrowid)
 			return obj
 
 def old_fid(obj,Config):
 	sql = "select * from `file` where `fid`= '%d'"%obj['fid']
-	debuglog(sql)
-	cur.execute(sql)
-	rss = cur.fetchall() 
+	rss = cur.fetchall(sql) 
 	if len(rss) > 0:
 		debuglog('fid found')
 		obj.update(file_sql2obj(rss[0]))
@@ -66,9 +59,7 @@ def rand_fid(obj,Config):
 	#sleep rand time for sql server cool down
 	sleep(randint(0,5))
 	sql = "SELECT `fid` from `file_distribute` WHERE `did`='%d' ORDER BY `dtime` LIMIT %d,1"%(Config.read('did'),randint(0,9)) 
-	debuglog(sql)
-	cur.execute(sql)
-	rss = cur.fetchall() 
+	rss = cur.fetchall(sql) 
 	if len(rss) > 0:
 		debuglog('rand fid found')
 		obj['fid'] = rss[0]['fid']
@@ -82,9 +73,7 @@ def rand_convert_fid(obj,Config):
 	#sleep rand time for sql server cool down
 	sleep(randint(0,5))
 	sql = "SELECT `file`.`fid` as `fid` FROM `file` left join  `file_converter` on (`file`.`fid` = `file_converter`.`fid`) right join `file_distribute` on (`file`.`fid` = `file_distribute`.`fid`) where `file_distribute`.`did`='%d' and `file_converter`.`did` is null LIMIT %d,1"%(Config.read('did'),randint(0,9)) 
-	debuglog(sql)
-	cur.execute(sql)
-	rss = cur.fetchall() 
+	rss = cur.fetchall(sql) 
 	if len(rss) > 0:
 		debuglog('rand fid found')
 		obj['fid'] = rss[0]['fid']
