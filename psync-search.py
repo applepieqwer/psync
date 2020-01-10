@@ -21,6 +21,7 @@ MyManager.register('Config')
 def load_jobs_from_url(Config):
 	#load objs form database tablename
 	#fatch fid and mission
+	print 'psync-search: fatch jobs from database'
 	try:
 		headers = {'Content-Type': 'application/json'}
 		request = urllib2.Request(url=Config.get('todo_jobs_url'), headers=headers, data=jsonEncode({'did':Config.get('did')}))

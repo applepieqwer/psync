@@ -1,10 +1,12 @@
 import MySQLdb
+from collections import deque
 from os import getpid,remove,lstat
 import os
 import exifread as exifreader
 import __builtin__
 from hashlib import sha1
 import json
+from time import sleep
 
 try:
 	import cPickle as pickle
@@ -30,6 +32,12 @@ def saveEncoding(face_data,Config):
 class ConfigClass(dict):
 	def read(self,key):
 		return self.get(key)
+
+class ListClass(deque):
+	def length(self):
+		return len(self)
+	def __str__(self):
+		return super().__str__(self)
 
 def do_sha1(s):
 	debuglog('hashing...%s'%s)
@@ -171,18 +179,53 @@ def debuglog(msg):
 		print 'debuglog[%s/%s]: %s'%(client_id,mod_name,msg)
 	return msg
 
-def init_db(Config):
-	#connect the database
-	try:
-		mysql_host = Config.read('mysql_host')
-		debuglog('Database %s connecting.'%mysql_host)
-		__builtin__.db = MySQLdb.connect(host=mysql_host,user=Config.read('mysql_user'),passwd=Config.read('mysql_passwd'),db=Config.read('mysql_db'),charset='utf8')
-		__builtin__.cur = db.cursor(cursorclass = MySQLdb.cursors.DictCursor) 	
-		debuglog('Database %s ready.'%mysql_host)
-		#update server stat here
-	except MySQLdb.Error,e:
-		debuglog("Mysql Init Error ")
-		exit(-1)
+class dbClass:
+	"""mysqldatabase interface"""
+	def __init__(self, Config):
+		self.database_ready = False
+		self.database_busy = False
+		self.Config = Config
 
-def halt_db(Config):
-	__builtin__.db.close()
+	def init_db(self):
+		#connect the database
+		try:
+			mysql_host = self.Config.read('mysql_host')
+			debuglog('Database %s connecting.'%mysql_host)
+			self.db = MySQLdb.connect(host=mysql_host,user=self.Config.read('mysql_user'),passwd=self.Config.read('mysql_passwd'),db=self.Config.read('mysql_db'),charset='utf8')
+			self.cur = db.cursor(cursorclass = MySQLdb.cursors.DictCursor) 	
+			debuglog('Database %s ready.'%mysql_host)
+			self.database_ready = True
+			self.database_busy = False
+		#update server stat here
+		except MySQLdb.Error,e:
+			debuglog("Mysql Init Error ")
+			self.database_ready = False
+			self.database_busy = False
+		
+	def halt_db(self):
+		if self.database_ready:
+			self.db.close()
+			self.database_ready = False
+			self.database_busy = False
+
+	def ready(self):
+		try:
+			if self.database_ready:
+				self.db.ping()
+		except MySQLdb.Error,e:
+			self.database_ready = False
+		return self.database_ready
+
+	def execute(self,sql):
+		while not self.ready():
+			sleep(1)
+			self.init_db()
+		while self.database_busy:
+			debuglog('Database busy. Wait 5 secs.')
+			sleep(5)
+		self.database_busy = True
+		debuglog('Run SQL: %s'%sql)
+		self.cur.execute(sql)
+		self.db.commit()
+		self.database_busy = False
+
