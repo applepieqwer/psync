@@ -9,13 +9,7 @@ def do_convert(cmd,obj,Config,d):
 	s = obj2dst(obj,Config)
 	cmd = cmd.replace('{SRC}',s).replace('{TARGET}',d)
 	debuglog(cmd)
-	if obj_is_video(obj,Config):
-		halt_db(Config)
-		r = os.system(cmd)
-		init_db(Config)
-		return r
-	else:
-		return os.system(cmd)
+	return os.system(cmd)
 
 
 def read_cid(obj,Config):

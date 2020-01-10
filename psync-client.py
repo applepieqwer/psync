@@ -1,8 +1,10 @@
 from multiprocessing.managers import BaseManager
 from time import sleep
-from psync_func import debuglog,debugset,halt_db,init_db
+from psync_func import debuglog,debugset
 import __builtin__
 import sys
+import MySQLdb
+
 defaultencoding = 'utf-8'
 if sys.getdefaultencoding() != defaultencoding:
 	reload(sys)
@@ -55,12 +57,20 @@ def main():
 						debuglog('MOD %s WARNING:%s'%(todo,e))
 						print obj
 						print 'DUMP DONE'
+					except MySQLdb.Error,e:
+						try:
+							debuglog("Database Error %d:%s" % (e.args[0], e.args[1]))
+						except IndexError:
+							debuglog("MySQL Error:%s" % str(e))
+						debuglog("Renew Obj Due to Database Error")
+						MainList.append(obj)
 					#else:
 						#debuglog("Oops! Error!")
 						#print obj
 						#print 'DUMP DONE'
 		else:
-			sleep(3)
+			print "psync-client: nothing to do....sleeping"
+			sleep(10)
 
 	
 
@@ -70,4 +80,4 @@ if __name__ == '__main__':
 		main()
 	except KeyboardInterrupt:
 		print 'KeyboardInterrupt'
-		__builtin__.db.close()
+		exit()

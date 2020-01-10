@@ -44,6 +44,7 @@ if __name__ == '__main__':
 						if f.endswith(Config.get('endswith')):
 							MainList.append(dict(mission='import', src=f, filename=fname))
 		else:
+			print "psync-search: nothing to do....sleeping"
 			sleep(60) #sleep 1 min
 	
 

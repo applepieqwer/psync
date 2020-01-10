@@ -227,12 +227,12 @@ class dbClass:
 			debuglog('Database busy. Wait 5 secs.')
 			sleep(5)
 		self.database_busy = True
-		debuglog('Run SQL: %s'%sql)
+		debuglog('Execute SQL: %s'%sql)
 		self.cur.execute(sql)
 		self.db.commit()
 		self.database_busy = False
 
-	def fatchall(self,sql):
+	def fetchall(self,sql):
 		while not self.ready():
 			sleep(1)
 			self.init_db()
@@ -240,13 +240,13 @@ class dbClass:
 			debuglog('Database busy. Wait 5 secs.')
 			sleep(5)
 		self.database_busy = True
-		debuglog('Run SQL: %s'%sql)
+		debuglog('Fetchall SQL: %s'%sql)
 		self.cur.execute(sql)
-		r = self.cur.fatchall()
+		r = self.cur.fetchall()
 		self.database_busy = False
 		return r
 
-	def fatchone(self,sql):
+	def fetchone(self,sql):
 		while not self.ready():
 			sleep(1)
 			self.init_db()
@@ -254,8 +254,8 @@ class dbClass:
 			debuglog('Database busy. Wait 5 secs.')
 			sleep(5)
 		self.database_busy = True
-		debuglog('Run SQL: %s'%sql)
+		debuglog('Fetchone SQL: %s'%sql)
 		self.cur.execute(sql)
-		r = self.cur.fatchone()
+		r = self.cur.fetchone()
 		self.database_busy = False
 		return r
