@@ -40,7 +40,7 @@ def new_fid(obj,Config):
 			temp = file_obj2sql_insert(obj)
 			sql = dict2insert('file',temp) %tuple(temp.values())
 			db.execute(sql)
-			obj['fid'] = int(cur.lastrowid)
+			obj['fid'] = int(db.lastrowid())
 			return obj
 
 def old_fid(obj,Config):

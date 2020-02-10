@@ -3,7 +3,6 @@ from time import sleep
 from psync_func import debuglog,debugset
 import __builtin__
 import sys
-import MySQLdb
 
 defaultencoding = 'utf-8'
 if sys.getdefaultencoding() != defaultencoding:
@@ -37,12 +36,16 @@ def main():
 	while True:
 		if MainList.length():
 			obj = MainList.popleft()
+			if obj is None:
+				continue
 			if obj['mission'] == '' or obj['mission'] == 'done':
 				debuglog('this obj is dump')
 				continue
 			else:
 				debuglog('mission: %s'%obj['mission'])
 				for todo in Mission[obj['mission']]:
+					if obj is None:
+						break
 					try:
 						debugset(todo)
 						obj['doing'] = todo
@@ -57,17 +60,12 @@ def main():
 						debuglog('MOD %s WARNING:%s'%(todo,e))
 						print obj
 						print 'DUMP DONE'
-					except MySQLdb.Error,e:
-						try:
-							debuglog("Database Error %d:%s" % (e.args[0], e.args[1]))
-						except IndexError:
-							debuglog("MySQL Error:%s" % str(e))
-						debuglog("Renew Obj Due to Database Error")
+					except TypeError,e:
+						debuglog('ERROR: %s TypeError %s'%(todo,e))
+						print obj
+						print 'DUMP DONE'
 						MainList.append(obj)
-					#else:
-						#debuglog("Oops! Error!")
-						#print obj
-						#print 'DUMP DONE'
+						break
 		else:
 			print "psync-client: nothing to do....sleeping"
 			sleep(10)

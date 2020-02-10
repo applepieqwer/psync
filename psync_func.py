@@ -1,4 +1,4 @@
-import MySQLdb
+import mysql.connector
 from collections import deque
 from os import getpid,remove,lstat
 import os
@@ -7,6 +7,7 @@ import __builtin__
 from hashlib import sha1
 import json
 from time import sleep
+from copy import deepcopy
 
 try:
 	import cPickle as pickle
@@ -192,32 +193,37 @@ class dbClass:
 		try:
 			mysql_host = self.Config.read('mysql_host')
 			debuglog('Database %s connecting.'%mysql_host)
-			self.db = MySQLdb.connect(host=mysql_host,user=self.Config.read('mysql_user'),passwd=self.Config.read('mysql_passwd'),db=self.Config.read('mysql_db'),charset='utf8')
-			self.cur = self.db.cursor(cursorclass = MySQLdb.cursors.DictCursor) 	
+			self.db = mysql.connector.connect(host=mysql_host,user=self.Config.read('mysql_user'),password=self.Config.read('mysql_passwd'),database=self.Config.read('mysql_db'),autocommit=True,compress=True,buffered=True)
+			self.cur = self.db.cursor(dictionary=True) 	
 			debuglog('Database %s ready.'%mysql_host)
 			self.database_ready = True
 			self.database_busy = False
-		except MySQLdb.Error,e:
-			try:
-				debuglog("Database Error %d:%s" % (e.args[0], e.args[1]))
-			except IndexError:
-				debuglog("MySQL Error:%s" % str(e))
+		except mysql.connector.Error as e:
+			debuglog("MySQL Error:%s" % str(e))
 			self.database_ready = False
 			self.database_busy = False
 		
 	def halt_db(self):
 		if self.database_ready:
+			self.cur.close()
 			self.db.close()
 			self.database_ready = False
 			self.database_busy = False
 
 	def ready(self):
+		#sleep(1)
 		try:
-			if self.database_ready:
-				self.db.ping()
-		except MySQLdb.Error,e:
+			if self.db:
+				if self.database_ready:
+					self.db.ping(True)
+			else:
+				self.database_ready = False
+		except mysql.connector.Error as e:
 			self.database_ready = False
-		return self.database_ready
+		return deepcopy(self.database_ready)
+
+	def busy(self):
+		return deepcopy(self.database_busy)
 
 	def execute(self,sql):
 		while not self.ready():
@@ -232,6 +238,9 @@ class dbClass:
 		self.db.commit()
 		self.database_busy = False
 
+	def lastrowid(self):
+		return deepcopy(self.cur.lastrowid)
+
 	def fetchall(self,sql):
 		while not self.ready():
 			sleep(1)
@@ -244,7 +253,7 @@ class dbClass:
 		self.cur.execute(sql)
 		r = self.cur.fetchall()
 		self.database_busy = False
-		return r
+		return deepcopy(r)
 
 	def fetchone(self,sql):
 		while not self.ready():
@@ -258,4 +267,4 @@ class dbClass:
 		self.cur.execute(sql)
 		r = self.cur.fetchone()
 		self.database_busy = False
-		return r
+		return deepcopy(r)

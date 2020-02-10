@@ -43,12 +43,23 @@ def main():
 
 	#loop
 	LastLen = 0
+	db_busy_count = 0
 	while True:
 		MainListLen = MainList.length()
 		db_ready = db.ready()
-		print("\rMainList.length = %d, db.ready = %s."%(MainListLen,db_ready))
+		db_busy = db.busy()
+		if db_busy:
+			db_busy_count = db_busy_count + 1
+		else:
+			db_busy_count = 0
+		if db_busy_count > 5:
+			db_busy_count = 0
+			print("psync-keeper: db.busy count to max, restart database")
+			db.halt_db()
+			db.init_db()
+		print("psync-keeper: MainList.length = %d, db.ready = %s, db.busy = %s."%(MainListLen,db_ready,db_busy))
 		d = LastLen - MainListLen
-		while MainListLen * 2 - LastLen < 10:
+		if MainListLen * 2 - LastLen < 10:
 			todo_jobs = load_jobs_from_url(Config)
 			if len(todo_jobs) > 0:
 				for job in todo_jobs:
@@ -56,14 +67,16 @@ def main():
 					MainList.append(dict(fid=int(job['fid']),mission=job['mission']))
 					MainListLen = MainListLen + 1
 			else:
+				print 'psync-keeper: No jobs from database,Sleeping 30 sec(s)'
+				sleep(30)
 				#print 'psync-keeper: Lazytag.....+2.'
 				#MainList.append(dict(mission='lazytag'))
 				#MainList.append(dict(mission='lazytag'))
 				#MainListLen = MainListLen + 2
-				print 'psync-keeper: Convert.....+2.'
-				MainList.append(dict(mission='convert'))
-				MainList.append(dict(mission='convert'))
-				MainListLen = MainListLen + 2
+				#print 'psync-keeper: Convert.....+2.'
+				#MainList.append(dict(mission='convert'))
+				#MainList.append(dict(mission='convert'))
+				#MainListLen = MainListLen + 2
 		sl = 30
 		if d > 0:
 			eta = sl * MainListLen / d
