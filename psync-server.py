@@ -1,6 +1,6 @@
 from multiprocessing.managers import BaseManager
 from ConfigParser import ConfigParser
-from psync_func import ConfigClass,ListClass,dbClass
+from psync_func import ConfigClass,ListClass
 from psync_func import debuglog,debugset
 
 class MyManager(BaseManager):
@@ -31,7 +31,7 @@ if __name__ == '__main__':
 		Config['mysql_passwd'] = cp.get('psync_config','mysql_passwd')
 		Config['mysql_db'] = cp.get('psync_config','mysql_db')
 
-		DB = dbClass(Config) # go for mysql
+		#DB = dbClass(Config) # go for mysql
 
 		L2S = ListClass() # list to search
 		MainList = ListClass() # main list
@@ -41,7 +41,7 @@ if __name__ == '__main__':
 		MyManager.register('List2Search',callable=lambda:L2S)
 		MyManager.register('MainList',callable=lambda:MainList)
 		MyManager.register('Config',callable=lambda:Config)
-		MyManager.register('DB',callable=lambda:DB)
+		#MyManager.register('DB',callable=lambda:DB)
 
 		manager = MyManager(address=('', 50000), authkey='1111')
 		s = manager.get_server()
@@ -49,5 +49,5 @@ if __name__ == '__main__':
 
 	except KeyboardInterrupt:
 		print 'KeyboardInterrupt'
-		DB.halt_db()
+		#DB.halt_db()
 		exit()

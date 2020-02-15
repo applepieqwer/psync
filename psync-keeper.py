@@ -33,31 +33,19 @@ def main():
 	#make connect to python server
 	MyManager.register('MainList')
 	MyManager.register('Config')
-	MyManager.register('DB')
+	#MyManager.register('DB')
 
 	manager = MyManager(address=('', 50000), authkey='1111')
 	manager.connect()
 	MainList = manager.MainList()
 	Config = manager.Config()
-	__builtin__.db = manager.DB()
+	#__builtin__.db = manager.DB()
 
 	#loop
 	LastLen = 0
-	db_busy_count = 0
 	while True:
 		MainListLen = MainList.length()
-		db_ready = db.ready()
-		db_busy = db.busy()
-		if db_busy:
-			db_busy_count = db_busy_count + 1
-		else:
-			db_busy_count = 0
-		if db_busy_count > 5:
-			db_busy_count = 0
-			print("psync-keeper: db.busy count to max, restart database")
-			db.halt_db()
-			db.init_db()
-		print("psync-keeper: MainList.length = %d, db.ready = %s, db.busy = %s."%(MainListLen,db_ready,db_busy))
+		print("psync-keeper: MainList.length = %d."%MainListLen)
 		d = LastLen - MainListLen
 		if MainListLen * 2 - LastLen < 10:
 			todo_jobs = load_jobs_from_url(Config)

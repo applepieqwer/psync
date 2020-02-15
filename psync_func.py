@@ -183,8 +183,6 @@ def debuglog(msg):
 class dbClass:
 	"""mysqldatabase interface"""
 	def __init__(self, Config):
-		self.database_ready = False
-		self.database_busy = False
 		self.Config = Config
 		self.init_db()
 
@@ -196,75 +194,50 @@ class dbClass:
 			self.db = mysql.connector.connect(host=mysql_host,user=self.Config.read('mysql_user'),password=self.Config.read('mysql_passwd'),database=self.Config.read('mysql_db'),autocommit=True,compress=True,buffered=True)
 			self.cur = self.db.cursor(dictionary=True) 	
 			debuglog('Database %s ready.'%mysql_host)
-			self.database_ready = True
-			self.database_busy = False
 		except mysql.connector.Error as e:
 			debuglog("MySQL Error:%s" % str(e))
-			self.database_ready = False
-			self.database_busy = False
+		return True
 		
 	def halt_db(self):
-		if self.database_ready:
+		if self.db.is_connected():
 			self.cur.close()
 			self.db.close()
-			self.database_ready = False
-			self.database_busy = False
+		return True
 
 	def ready(self):
-		#sleep(1)
 		try:
-			if self.db:
-				if self.database_ready:
-					self.db.ping(True)
-			else:
-				self.database_ready = False
-		except mysql.connector.Error as e:
-			self.database_ready = False
-		return deepcopy(self.database_ready)
-
-	def busy(self):
-		return deepcopy(self.database_busy)
+			self.db.ping(reconnect=True, attempts=5, delay=1)
+		except mysql.connector.InterfaceError:
+			debuglog('Database InterfaceError.')
+			self.init_db()
+		return self.db.is_connected()
 
 	def execute(self,sql):
 		while not self.ready():
-			sleep(1)
-			self.init_db()
-		while self.database_busy:
-			debuglog('Database busy. Wait 5 secs.')
+			debuglog('Database not ready. Wait 5 secs.')
 			sleep(5)
-		self.database_busy = True
 		debuglog('Execute SQL: %s'%sql)
-		self.cur.execute(sql)
+		result = self.cur.execute(sql)
 		self.db.commit()
-		self.database_busy = False
+		return True
 
 	def lastrowid(self):
 		return deepcopy(self.cur.lastrowid)
 
 	def fetchall(self,sql):
 		while not self.ready():
-			sleep(1)
-			self.init_db()
-		while self.database_busy:
-			debuglog('Database busy. Wait 5 secs.')
+			debuglog('Database not ready. Wait 5 secs.')
 			sleep(5)
-		self.database_busy = True
 		debuglog('Fetchall SQL: %s'%sql)
 		self.cur.execute(sql)
 		r = self.cur.fetchall()
-		self.database_busy = False
 		return deepcopy(r)
 
 	def fetchone(self,sql):
 		while not self.ready():
-			sleep(1)
-			self.init_db()
-		while self.database_busy:
-			debuglog('Database busy. Wait 5 secs.')
+			debuglog('Database not ready. Wait 5 secs.')
 			sleep(5)
-		self.database_busy = True
 		debuglog('Fetchone SQL: %s'%sql)
 		self.cur.execute(sql)
 		r = self.cur.fetchone()
-		self.database_busy = False
 		return deepcopy(r)

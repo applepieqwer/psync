@@ -1,6 +1,6 @@
 from multiprocessing.managers import BaseManager
 from time import sleep
-from psync_func import debuglog,debugset
+from psync_func import debuglog,debugset,dbClass
 import __builtin__
 import sys
 
@@ -17,13 +17,13 @@ def main():
 	#make connect to python server
 	MyManager.register('MainList')
 	MyManager.register('Config')
-	MyManager.register('DB')
+	#MyManager.register('DB')
 
 	manager = MyManager(address=('', 50000), authkey='1111')
 	manager.connect()
 	MainList = manager.MainList()
 	Config = manager.Config()
-	__builtin__.db = manager.DB()
+	__builtin__.db = dbClass(Config)
 	
 	#define Mission roadmap
 	Mission = { 
@@ -66,6 +66,12 @@ def main():
 						print 'DUMP DONE'
 						MainList.append(obj)
 						break
+					except:
+						debuglog('ERROR: %s Unknown Error'%todo)
+						print obj
+						print 'DUMP DONE'
+						MainList.append(obj)
+						break
 		else:
 			print "psync-client: nothing to do....sleeping"
 			sleep(10)
@@ -78,4 +84,5 @@ if __name__ == '__main__':
 		main()
 	except KeyboardInterrupt:
 		print 'KeyboardInterrupt'
+		db.halt_db()
 		exit()
