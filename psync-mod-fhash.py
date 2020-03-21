@@ -37,6 +37,6 @@ def do(obj,Config):
 	mission = obj['mission']
 	if mission in ['import']:
 		return new_fhash(obj,Config)
-	if mission in ['lazytag','lazycheck','convert']:
+	if mission in ['lazytag','lazycheck','convert','lazygps']:
 		return old_fhash(obj,Config)
 	return obj

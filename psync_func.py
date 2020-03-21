@@ -8,6 +8,9 @@ from hashlib import sha1
 import json
 from time import sleep
 from copy import deepcopy
+from datetime import date
+from base64 import b64encode,b64decode
+import geocoder
 
 try:
 	import cPickle as pickle
@@ -16,6 +19,34 @@ except:
 
 #from shutil import copy2 as shutil_move
 from shutil import move as shutil_move
+
+def geo_osm_raw(lat,lng):
+	r = geocoder.osm([lat,lng], method='reverse')
+	if r.ok:
+		return r.json['raw']
+	else:
+		return ""
+
+def geo_baidu_raw(lat,lng,key):
+	r = geocoder.baidu([lat,lng], method='reverse',key=key)
+	if r.ok:
+		return r.json['raw']
+	else:
+		return ""
+
+def file_sql2obj(rs):
+	return {'fid':rs['fid'],
+		'fhash':rs['fhash'],
+		'ftype':rs['ftype'],
+		'ctime':rs['ctime'],
+		'filename':b64decode(rs['filename']),
+		'filetime':rs['filetime']}
+
+def file_obj2sql_insert(obj):
+	return {'fhash':obj['fhash'],
+		'ftype':obj['ftype'],
+		'filename':b64encode(obj['filename']),
+		'filetime':obj['filetime']}
 
 def saveEncoding(face_data,Config):
 	filename = 'face.%d.encodings.pkl'%Config['did']
@@ -53,6 +84,86 @@ def do_sha1(s):
 			data = f.read(read_size)
 		return sha1Obj.hexdigest()
 
+def parse_gps(titude):
+	return float(titude.values[0].num + (titude.values[1].num+(float(titude.values[2].num)/float(titude.values[2].den))/60)/60)
+
+def parse_alt(alt):
+	return float(alt.values[0].num) / float(alt.values[0].den)
+
+def readGPS(obj,Config):
+	if obj_is_video(obj,Config):
+		debuglog(u'readGPS: %s has no GPS data'%obj['fhash'])
+		return False
+	if hasattr(readGPS, 'fhash') and hasattr(readGPS, 'gps_data') and readGPS.fhash == obj['fhash']:
+		debuglog(u'readGPS: read GPS data from cache %s'%obj['fhash'])
+		return deepcopy(readGPS.gps_data)
+	else:
+		readGPS.fhash = obj['fhash']
+		readGPS.gps_data = {}
+		dst = obj2dst(obj,Config)
+		debuglog(u'readGPS: read GPS data from file %s'%obj['fhash'])
+		f = open(dst,'rb')
+		tags = exifreader.process_file(f, details=False)
+		f.close()
+		for i in tags.keys():
+			if i[:3] == 'GPS':
+				readGPS.gps_data[i] = tags[i]
+		if len(readGPS.gps_data) < 1 :
+			debuglog(u'readGPS: %s has no GPS data'%obj['fhash'])
+			return False
+		readGPS.gps_data['fhash'] = obj['fhash']
+		return deepcopy(readGPS.gps_data)
+
+def readGPSlong(obj,Config):
+	gps_data = readGPS(obj,Config)
+	if gps_data == False:
+		return False
+	if gps_data['fhash'] != obj['fhash']:
+		debuglog(u'readGPSlong: GPS data fhash mismatch')
+		return False
+	if str(gps_data['GPS GPSLongitudeRef']) == 'W':
+		return 0 - parse_gps(gps_data['GPS GPSLongitude'])
+	else:
+		return parse_gps(gps_data['GPS GPSLongitude'])
+
+def readGPSlat(obj,Config):
+	gps_data = readGPS(obj,Config)
+	if gps_data == False:
+		return False
+	if gps_data['fhash'] != obj['fhash']:
+		debuglog(u'readGPSlat: GPS data fhash mismatch')
+		return False
+	if str(gps_data['GPS GPSLatitudeRef']) == 'S':
+		return 0 - parse_gps(gps_data['GPS GPSLatitude'])
+	else:
+		return parse_gps(gps_data['GPS GPSLatitude'])
+
+def readGPSalt(obj,Config):
+	gps_data = readGPS(obj,Config)
+	if gps_data == False:
+		return False
+	if gps_data['fhash'] != obj['fhash']:
+		debuglog(u'readGPSalt: GPS data fhash mismatch')
+		return False
+	try:
+		if int(gps_data['GPS GPSAltitudeRef'].values[0]) == 1:
+			return 0 - parse_alt(gps_data['GPS GPSAltitude'])
+		else:
+			return parse_alt(gps_data['GPS GPSAltitude'])
+	except AttributeError:
+		debuglog(u'readGPSalt: GPS GPSAltitudeRef AttributeError')
+		return False
+	
+
+def readGPSdatetime(obj,Config):
+	gps_data = readGPS(obj,Config)
+	if gps_data == False:
+		return False
+	if gps_data['fhash'] != obj['fhash']:
+		debuglog(u'readGPSalt: GPS data fhash mismatch')
+		return False
+	return u'%s %02d:%02d:%02d'%(gps_data['GPS GPSDate'].values,gps_data['GPS GPSTimeStamp'].values[0].num,gps_data['GPS GPSTimeStamp'].values[1].num,gps_data['GPS GPSTimeStamp'].values[2].num)
+
 def readEXIFwidth(obj,Config):
 	return readEXIF(obj,Config,'EXIF ExifImageWidth')
 
@@ -80,7 +191,7 @@ def readdate(obj,Config):
 def readEXIF(obj,Config,tag):
 	dst = obj2dst(obj,Config)
 	f = open(dst,'rb')
-	tags = exifreader.process_file(f, stop_tag=tag)
+	tags = exifreader.process_file(f, stop_tag=tag, details=False)
 	f.close()
 	if tag in tags.keys():
 		return tags[tag]
@@ -206,6 +317,7 @@ class dbClass:
 
 	def ready(self):
 		try:
+			#debuglog('Ping Database.')
 			self.db.ping(reconnect=True, attempts=5, delay=1)
 		except mysql.connector.InterfaceError:
 			debuglog('Database InterfaceError.')
@@ -213,31 +325,72 @@ class dbClass:
 		return self.db.is_connected()
 
 	def execute(self,sql):
-		while not self.ready():
-			debuglog('Database not ready. Wait 5 secs.')
-			sleep(5)
-		debuglog('Execute SQL: %s'%sql)
-		result = self.cur.execute(sql)
-		self.db.commit()
+		success = False
+		while not success:
+			try:
+				while not self.ready():
+					debuglog('Database not ready. Wait 5 secs.')
+					sleep(5)
+				debuglog('Execute SQL: %s'%sql)
+				result = self.cur.execute(sql)
+				self.db.commit()
+				debuglog('Execute Done.')
+				success = True
+			except mysql.connector.InterfaceError:
+				success = False
+				debuglog('Execute SQL InterfaceError, Retry')
+			except mysql.connector.OperationalError:
+				success = False
+				debuglog('Execute SQL OperationalError, Retry')
+		return True
+
+	def execute2file(self,sql):
+		filename = 'sql_log%s-%s.sql' % (date.today(),os.getpid())
+		debuglog('Save SQL to file: %s'%filename)
+		with open(filename, 'a') as f:
+			f.write('%s;\n'%sql)
+		debuglog(sql)
 		return True
 
 	def lastrowid(self):
 		return deepcopy(self.cur.lastrowid)
 
 	def fetchall(self,sql):
-		while not self.ready():
-			debuglog('Database not ready. Wait 5 secs.')
-			sleep(5)
-		debuglog('Fetchall SQL: %s'%sql)
-		self.cur.execute(sql)
-		r = self.cur.fetchall()
+		success = False
+		while not success:
+			try:
+				while not self.ready():
+					debuglog('Database not ready. Wait 5 secs.')
+					sleep(5)
+				debuglog('Fetchall SQL: %s'%sql)
+				result = self.cur.execute(sql)
+				r = self.cur.fetchall()
+				debuglog('Fatchall Done.')
+				success = True
+			except mysql.connector.InterfaceError:
+				success = False
+				debuglog('Execute SQL InterfaceError, Retry')
+			except mysql.connector.OperationalError:
+				success = False
+				debuglog('Execute SQL OperationalError, Retry')
 		return deepcopy(r)
 
 	def fetchone(self,sql):
-		while not self.ready():
-			debuglog('Database not ready. Wait 5 secs.')
-			sleep(5)
-		debuglog('Fetchone SQL: %s'%sql)
-		self.cur.execute(sql)
-		r = self.cur.fetchone()
+		success = False
+		while not success:
+			try:
+				while not self.ready():
+					debuglog('Database not ready. Wait 5 secs.')
+					sleep(5)
+				debuglog('Fetchone SQL: %s'%sql)
+				result = self.cur.execute(sql)
+				r = self.cur.fetchone()
+				debuglog('Fatchone Done.')
+				success = True
+			except mysql.connector.InterfaceError:
+				success = False
+				debuglog('Execute SQL InterfaceError, Retry')
+			except mysql.connector.OperationalError:
+				success = False
+				debuglog('Execute SQL OperationalError, Retry')
 		return deepcopy(r)

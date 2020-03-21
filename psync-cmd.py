@@ -1,5 +1,7 @@
 from multiprocessing.managers import BaseManager
 import readline
+from psync_func import debuglog,debugset,dbClass
+import __builtin__
 
 class MyManager(BaseManager):
 	pass
@@ -15,6 +17,7 @@ if __name__ == '__main__':
 	L2S = manager.List2Search()
 	MainList = manager.MainList()
 	Config = manager.Config()
+	__builtin__.db = dbClass(Config)
 	while True:
 		print input('?>')
 

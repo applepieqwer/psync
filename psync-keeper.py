@@ -6,6 +6,7 @@ import os
 from json import dumps as jsonEncode
 from json import loads as jsonDecode
 import urllib2
+import socket
 
 defaultencoding = 'utf-8'
 if sys.getdefaultencoding() != defaultencoding:
@@ -20,10 +21,16 @@ def load_jobs_from_url(Config):
 	try:
 		headers = {'Content-Type': 'application/json'}
 		request = urllib2.Request(url=Config.get('todo_jobs_url'), headers=headers, data=jsonEncode({'did':Config.get('did')}))
-		response = urllib2.urlopen(request)
-		r = jsonDecode(response.read())
+		response = urllib2.urlopen(request,timeout=200)
+		d = response.read()
+		print d
+		r = jsonDecode(d)
 		return r['jobs']
-	except:
+	except urllib2.URLError, e:
+		print 'psync-keeper: URLError'
+		return list()
+	except socket.timeout, e:
+		print 'psync-keeper: timeout'
 		return list()
 
 class MyManager(BaseManager):

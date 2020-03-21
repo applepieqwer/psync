@@ -31,6 +31,7 @@ if __name__ == '__main__':
 		Config['mysql_passwd'] = cp.get('psync_config','mysql_passwd')
 		Config['mysql_db'] = cp.get('psync_config','mysql_db')
 
+		Config['baidu_key'] = cp.get('psync_gps','baidu_key')
 		#DB = dbClass(Config) # go for mysql
 
 		L2S = ListClass() # list to search

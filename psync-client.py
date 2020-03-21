@@ -30,7 +30,8 @@ def main():
 	'import' :   ['fhash' , 'ftype' , 'fid' , 'distribute' , 'debug'] , 
 	'lazycheck': ['fid' , 'distribute' , 'fhash' , 'distribute' , 'debug'] ,
 	'lazytag' :  ['fid' , 'distribute' , 'fhash' , 'distribute' , 'savetag' , 'debug'] ,
-	'convert' :  ['fid' , 'distribute' , 'fhash' , 'distribute' , 'convert' , 'debug']}
+	'convert' :  ['fid' , 'distribute' , 'fhash' , 'distribute' , 'convert' , 'debug'] ,
+	'lazygps' :  ['fid' , 'distribute' , 'fhash' , 'distribute' , 'savegps' , 'debug']}
 
 	#loop
 	while True:
@@ -66,12 +67,12 @@ def main():
 						print 'DUMP DONE'
 						MainList.append(obj)
 						break
-					except:
-						debuglog('ERROR: %s Unknown Error'%todo)
-						print obj
-						print 'DUMP DONE'
-						MainList.append(obj)
-						break
+					#except:
+					#	debuglog('ERROR: %s Unknown Error'%todo)
+					#	print obj
+					#	print 'DUMP DONE'
+					#	MainList.append(obj)
+					#	break
 		else:
 			print "psync-client: nothing to do....sleeping"
 			sleep(10)
