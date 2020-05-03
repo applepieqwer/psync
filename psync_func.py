@@ -112,7 +112,46 @@ def readGPS(obj,Config):
 			debuglog(u'readGPS: %s has no GPS data'%obj['fhash'])
 			return False
 		readGPS.gps_data['fhash'] = obj['fhash']
+		#read gps long
+		if str(readGPS.gps_data['GPS GPSLongitudeRef']) == 'W':
+			readGPS.gps_data['long'] = 0 - parse_gps(readGPS.gps_data['GPS GPSLongitude'])
+		else:
+			readGPS.gps_data['long'] = parse_gps(readGPS.gps_data['GPS GPSLongitude'])
+		#read gps lat
+		if str(readGPS.gps_data['GPS GPSLatitudeRef']) == 'S':
+			readGPS.gps_data['lat'] = 0 - parse_gps(readGPS.gps_data['GPS GPSLatitude'])
+		else:
+			readGPS.gps_data['lat'] = parse_gps(readGPS.gps_data['GPS GPSLatitude'])
+		#read gps alt
+		try:
+			if int(readGPS.gps_data['GPS GPSAltitudeRef'].values[0]) == 1:
+				readGPS.gps_data['alt'] = 0 - parse_alt(readGPS.gps_data['GPS GPSAltitude'])
+			else:
+				readGPS.gps_data['alt'] = parse_alt(readGPS.gps_data['GPS GPSAltitude'])
+		except AttributeError:
+			debuglog(u'readGPS: GPS GPSAltitudeRef AttributeError')
+			readGPS.gps_data['alt'] = False
+		#read geo from baidu
+		debuglog(u'readGPS: read geo from baidu')
+		readGPS.gps_data['baidu_raw'] = geo_baidu_raw(readGPS.gps_data['lat'],readGPS.gps_data['long'],Config.read('baidu_key'))
+		#read geo from osm
+		debuglog(u'readGPS: read geo from osm')
+		readGPS.gps_data['osm_raw'] = geo_osm_raw(readGPS.gps_data['lat'],readGPS.gps_data['long'])
 		return deepcopy(readGPS.gps_data)
+
+def readGPSjson(obj,Config):
+	gps_data = readGPS(obj,Config)
+	if gps_data == False:
+		return False
+	if gps_data['fhash'] != obj['fhash']:
+		debuglog(u'readGPSraw: GPS data fhash mismatch')
+		return False
+	gps_json = {'fid':obj['fid'],
+				'lat':gps_data['lat'],
+				'long':gps_data['long'],
+				'baidu_raw':gps_data['baidu_raw'],
+				'osm_raw':gps_data['osm_raw']}
+	return b64encode(json.dumps(gps_json))
 
 def readGPSlong(obj,Config):
 	gps_data = readGPS(obj,Config)
@@ -121,10 +160,8 @@ def readGPSlong(obj,Config):
 	if gps_data['fhash'] != obj['fhash']:
 		debuglog(u'readGPSlong: GPS data fhash mismatch')
 		return False
-	if str(gps_data['GPS GPSLongitudeRef']) == 'W':
-		return 0 - parse_gps(gps_data['GPS GPSLongitude'])
-	else:
-		return parse_gps(gps_data['GPS GPSLongitude'])
+	return gps_data['long']
+	
 
 def readGPSlat(obj,Config):
 	gps_data = readGPS(obj,Config)
@@ -133,10 +170,7 @@ def readGPSlat(obj,Config):
 	if gps_data['fhash'] != obj['fhash']:
 		debuglog(u'readGPSlat: GPS data fhash mismatch')
 		return False
-	if str(gps_data['GPS GPSLatitudeRef']) == 'S':
-		return 0 - parse_gps(gps_data['GPS GPSLatitude'])
-	else:
-		return parse_gps(gps_data['GPS GPSLatitude'])
+	return gps_data['lat']
 
 def readGPSalt(obj,Config):
 	gps_data = readGPS(obj,Config)
@@ -145,14 +179,7 @@ def readGPSalt(obj,Config):
 	if gps_data['fhash'] != obj['fhash']:
 		debuglog(u'readGPSalt: GPS data fhash mismatch')
 		return False
-	try:
-		if int(gps_data['GPS GPSAltitudeRef'].values[0]) == 1:
-			return 0 - parse_alt(gps_data['GPS GPSAltitude'])
-		else:
-			return parse_alt(gps_data['GPS GPSAltitude'])
-	except AttributeError:
-		debuglog(u'readGPSalt: GPS GPSAltitudeRef AttributeError')
-		return False
+	return gps_data['alt']
 	
 
 def readGPSdatetime(obj,Config):
@@ -163,6 +190,46 @@ def readGPSdatetime(obj,Config):
 		debuglog(u'readGPSalt: GPS data fhash mismatch')
 		return False
 	return u'%s %02d:%02d:%02d'%(gps_data['GPS GPSDate'].values,gps_data['GPS GPSTimeStamp'].values[0].num,gps_data['GPS GPSTimeStamp'].values[1].num,gps_data['GPS GPSTimeStamp'].values[2].num)
+
+def readGPSBaiduOSM(obj,Config,i):
+	gps_data = readGPS(obj,Config)
+	if gps_data == False:
+		return False
+	if gps_data['fhash'] != obj['fhash']:
+		debuglog(u'readGPSBaiduOSM: GPS data fhash mismatch')
+		return False
+	try:
+		if i == 'BaiduPlace':
+			return gps_data['baidu_raw']['formatted_address']
+		elif i == 'BaiduCountry':
+			return gps_data['baidu_raw']['addressComponent']['country']
+		elif i == 'BaiduCity':
+			return gps_data['baidu_raw']['addressComponent']['city']
+		elif i == 'OSMPlace':
+			return gps_data['osm_raw']['display_name']
+		elif i == 'OSMCountry':
+			return gps_data['osm_raw']['address']['country']
+		elif i == 'OSMCity':
+			return gps_data['osm_raw']['address']['city']
+		else:
+			raise KeyError
+	except KeyError as e:
+		debuglog(u'readGPSBaiduOSM: %s not found'%i)
+		return False
+
+def readGPSBaiduPlace(obj,Config):
+	return readGPSBaiduOSM(obj,Config,'BaiduPlace')
+def readGPSBaiduCountry(obj,Config):
+	return readGPSBaiduOSM(obj,Config,'BaiduCountry')
+def readGPSBaiduCity(obj,Config):
+	return readGPSBaiduOSM(obj,Config,'BaiduCity')
+def readGPSOSMPlace(obj,Config):
+	return readGPSBaiduOSM(obj,Config,'OSMPlace')
+def readGPSOSMCountry(obj,Config):
+	return readGPSBaiduOSM(obj,Config,'OSMCountry')
+def readGPSOSMCity(obj,Config):
+	return readGPSBaiduOSM(obj,Config,'OSMCity')
+
 
 def readEXIFwidth(obj,Config):
 	return readEXIF(obj,Config,'EXIF ExifImageWidth')
@@ -315,6 +382,9 @@ class dbClass:
 			self.db.close()
 		return True
 
+	def escape_string(self,s):
+		return self.db._cmysql.escape_string(s)
+
 	def ready(self):
 		try:
 			#debuglog('Ping Database.')
@@ -348,7 +418,7 @@ class dbClass:
 		filename = 'sql_log%s-%s.sql' % (date.today(),os.getpid())
 		debuglog('Save SQL to file: %s'%filename)
 		with open(filename, 'a') as f:
-			f.write('%s;\n'%sql)
+			f.write('%s;\n'%self.db._cmysql.escape_string(sql))
 		debuglog(sql)
 		return True
 
