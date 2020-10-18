@@ -384,7 +384,7 @@ class dbClassLocal:
 		filename = 'sql_log%s-%s.sql' % (date.today(),os.getpid())
 		debuglog('Save SQL to file: %s'%filename)
 		with open(filename, 'a') as f:
-			f.write('%s;\n'%self.db._cmysql.escape_string(sql))
+			f.write('%s;\n'%sql)
 		debuglog(sql)
 		return True
 
