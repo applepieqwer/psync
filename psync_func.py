@@ -113,30 +113,32 @@ def readGPS(obj,Config):
 			return False
 		readGPS.gps_data['fhash'] = obj['fhash']
 		#read gps long
-		if str(readGPS.gps_data['GPS GPSLongitudeRef']) == 'W':
-			readGPS.gps_data['long'] = 0 - parse_gps(readGPS.gps_data['GPS GPSLongitude'])
-		else:
-			readGPS.gps_data['long'] = parse_gps(readGPS.gps_data['GPS GPSLongitude'])
+		if readGPS.gps_data.has_key('GPS GPSLongitudeRef') and readGPS.gps_data.has_key('GPS GPSLongitude'):
+			if str(readGPS.gps_data['GPS GPSLongitudeRef']) == 'W':
+				readGPS.gps_data['long'] = 0 - parse_gps(readGPS.gps_data['GPS GPSLongitude'])
+			else:
+				readGPS.gps_data['long'] = parse_gps(readGPS.gps_data['GPS GPSLongitude'])
+		
 		#read gps lat
-		if str(readGPS.gps_data['GPS GPSLatitudeRef']) == 'S':
-			readGPS.gps_data['lat'] = 0 - parse_gps(readGPS.gps_data['GPS GPSLatitude'])
-		else:
-			readGPS.gps_data['lat'] = parse_gps(readGPS.gps_data['GPS GPSLatitude'])
+		if readGPS.gps_data.has_key('GPS GPSLatitudeRef') and readGPS.gps_data.has_key('GPS GPSLatitude'):
+			if str(readGPS.gps_data['GPS GPSLatitudeRef']) == 'S':
+				readGPS.gps_data['lat'] = 0 - parse_gps(readGPS.gps_data['GPS GPSLatitude'])
+			else:
+				readGPS.gps_data['lat'] = parse_gps(readGPS.gps_data['GPS GPSLatitude'])
 		#read gps alt
-		try:
+		if readGPS.gps_data.has_key('GPS GPSAltitudeRef') and readGPS.gps_data.has_key('GPS GPSAltitude'):
 			if int(readGPS.gps_data['GPS GPSAltitudeRef'].values[0]) == 1:
 				readGPS.gps_data['alt'] = 0 - parse_alt(readGPS.gps_data['GPS GPSAltitude'])
 			else:
 				readGPS.gps_data['alt'] = parse_alt(readGPS.gps_data['GPS GPSAltitude'])
-		except AttributeError:
-			debuglog(u'readGPS: GPS GPSAltitudeRef AttributeError')
-			readGPS.gps_data['alt'] = False
-		#read geo from baidu
-		debuglog(u'readGPS: read geo from baidu')
-		readGPS.gps_data['baidu_raw'] = geo_baidu_raw(readGPS.gps_data['lat'],readGPS.gps_data['long'],Config.read('baidu_key'))
-		#read geo from osm
-		debuglog(u'readGPS: read geo from osm')
-		readGPS.gps_data['osm_raw'] = geo_osm_raw(readGPS.gps_data['lat'],readGPS.gps_data['long'])
+
+		if readGPS.gps_data.has_key('long') and readGPS.gps_data.has_key('lat'):
+			#read geo from baidu
+			debuglog(u'readGPS: read geo from baidu')
+			readGPS.gps_data['baidu_raw'] = geo_baidu_raw(readGPS.gps_data['lat'],readGPS.gps_data['long'],Config.read('baidu_key'))
+			#read geo from osm
+			debuglog(u'readGPS: read geo from osm')
+			readGPS.gps_data['osm_raw'] = geo_osm_raw(readGPS.gps_data['lat'],readGPS.gps_data['long'])
 		return deepcopy(readGPS.gps_data)
 
 def readGPSjson(obj,Config):
@@ -160,7 +162,10 @@ def readGPSlong(obj,Config):
 	if gps_data['fhash'] != obj['fhash']:
 		debuglog(u'readGPSlong: GPS data fhash mismatch')
 		return False
-	return gps_data['long']
+	if gps_data.has_key('long'):
+		return gps_data['long']
+	else:
+		return False
 	
 
 def readGPSlat(obj,Config):
@@ -170,7 +175,10 @@ def readGPSlat(obj,Config):
 	if gps_data['fhash'] != obj['fhash']:
 		debuglog(u'readGPSlat: GPS data fhash mismatch')
 		return False
-	return gps_data['lat']
+	if gps_data.has_key('lat'):
+		return gps_data['lat']
+	else:
+		return False
 
 def readGPSalt(obj,Config):
 	gps_data = readGPS(obj,Config)
@@ -179,7 +187,10 @@ def readGPSalt(obj,Config):
 	if gps_data['fhash'] != obj['fhash']:
 		debuglog(u'readGPSalt: GPS data fhash mismatch')
 		return False
-	return gps_data['alt']
+	if gps_data.has_key('alt'):
+		return gps_data['alt']
+	else:
+		return False
 	
 
 def readGPSdatetime(obj,Config):
@@ -358,7 +369,26 @@ def debuglog(msg):
 		print 'debuglog[%s/%s]: %s'%(client_id,mod_name,msg)
 	return msg
 
-class dbClass:
+class dbClassLocal:
+	def init_db(self):
+		return True
+	def halt_db(self):
+		return True
+	def escape_string(self,s):
+		return s
+	def ready(self):
+		return True
+	def execute(self,sql):
+		return self.execute2file(sql)
+	def execute2file(self,sql):
+		filename = 'sql_log%s-%s.sql' % (date.today(),os.getpid())
+		debuglog('Save SQL to file: %s'%filename)
+		with open(filename, 'a') as f:
+			f.write('%s;\n'%self.db._cmysql.escape_string(sql))
+		debuglog(sql)
+		return True
+
+class dbClass(dbClassLocal):
 	"""mysqldatabase interface"""
 	def __init__(self, Config):
 		self.Config = Config
@@ -412,14 +442,6 @@ class dbClass:
 			except mysql.connector.OperationalError:
 				success = False
 				debuglog('Execute SQL OperationalError, Retry')
-		return True
-
-	def execute2file(self,sql):
-		filename = 'sql_log%s-%s.sql' % (date.today(),os.getpid())
-		debuglog('Save SQL to file: %s'%filename)
-		with open(filename, 'a') as f:
-			f.write('%s;\n'%self.db._cmysql.escape_string(sql))
-		debuglog(sql)
 		return True
 
 	def lastrowid(self):
