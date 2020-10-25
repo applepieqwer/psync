@@ -2,6 +2,7 @@
 ####input file is "psync-local-check.input"
 ####download all the fhash with:
 ####mysql --compress -upsync -p -hpsync.db.6677333.hostedresource.com psync -ss -e 'SELECT `fhash` FROM `file`;' | sed 's/\t/","/g;s/^//;s/$//;s/\n//g' > psync-local-check.input
+####mysql --compress -upsync -p -hpsync.db.6677333.hostedresource.com psync < sql_log2020-10-18-4192.sql
 
 import __builtin__
 import os
