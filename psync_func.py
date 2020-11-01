@@ -369,7 +369,56 @@ def debuglog(msg):
 		print 'debuglog[%s/%s]: %s'%(client_id,mod_name,msg)
 	return msg
 
+def wget(fhash,Config):
+	return 'wget -c -O \'%s\' \'%s/%s\''%(obj2dst({'fhash':fhash},Config),Config.read('wget_target_url'),hash2path(fhash))
+
+class CheckLocal:
+	def __init__(self):
+		pass
+	def check(self,obj,Config):
+		src = obj2dst(obj,Config)
+		if not os.path.isfile(src):
+			self.check_fail(obj,Config)
+			return False
+		else:
+			if obj['fhash'] == do_sha1(src):
+				self.check_pass(obj,Config)
+				return True
+			else:
+				self.check_fail(obj,Config)
+				return False
+	def check_pass(self,obj,Config):
+		debuglog('CheckLocal Pass')
+	def check_fail(self,obj,Config):
+		debuglog('CheckLocal Fail')
+
+class CheckLocal_sql(CheckLocal):
+	def __init__(self):
+		CheckLocal.__init__(self)
+		__builtin__.db = dbClassLocal()
+	def check_pass(self,obj,Config):
+		debuglog('CheckLocal_sql Pass')
+	def check_fail(self,obj,Config):
+		sql = "DELETE FROM `file_distribute` WHERE `file_distribute`.`fid` IN (SELECT `fid`  FROM `file` WHERE `fhash` = '%s') AND `file_distribute`.`did` = %s LIMIT 1"%(obj['fhash'],Config.read('did'))
+		db.execute(sql)
+		debuglog('CheckLocal_sql Fail: %s <==============Check Fail'%obj['fhash'])
+
+class CheckLocal_wget(CheckLocal):
+	def __init__(self):
+		CheckLocal.__init__(self)
+		pass
+	def check_pass(self,obj,Config):
+		debuglog('CheckLocal_wget Pass')
+	def check_fail(self,obj,Config):
+		filename = 'wget_log%s-%s.sh' % (date.today(),os.getpid())
+		debuglog('Save Wget to file: %s'%filename)
+		with open(filename, 'a') as f:
+			f.write('%s;\n'%wget(obj['fhash'],Config))
+		debuglog('CheckLocal_wget Fail: %s <==============Check Fail'%obj['fhash'])
+
 class dbClassLocal:
+	def __init__(self):
+		pass
 	def init_db(self):
 		return True
 	def halt_db(self):

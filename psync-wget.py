@@ -3,7 +3,7 @@ from json import dumps as jsonEncode
 from json import loads as jsonDecode
 import urllib2
 import os
-from psync_func import obj2dst,obj2convert,do_sha1,hash2path
+from psync_func import obj2dst,obj2convert,do_sha1,hash2path,wget
 from psync_func import ConfigClass
 from time import sleep
 
@@ -18,7 +18,7 @@ def sendPost(data,Config):
 	return jsonDecode(response.read())
 
 def goJob(job,Config):
-	cmd = 'wget -c -O \'%s\' \'%s/%s\''%(obj2dst({'fhash':job['fhash']},Config),job['distserver'],hash2path(job['fhash']))
+	cmd = wget(job['fhash'],job['distserver'],Config)
 	print cmd
 	os.system(cmd)
 

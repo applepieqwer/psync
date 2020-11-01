@@ -7,23 +7,11 @@
 import __builtin__
 import os
 from ConfigParser import ConfigParser
-from psync_func import ConfigClass
-from psync_func import debuglog,debugset,dbClassLocal,do_sha1,obj2dst
-
-def sql_delete_did(fhash,did):
-	sql = "DELETE FROM `file_distribute` WHERE `file_distribute`.`fid` IN (SELECT `fid`  FROM `file` WHERE `fhash` = '%s') AND `file_distribute`.`did` = %s LIMIT 1"%(fhash,did)
-	db.execute(sql)
-
-def check_fail(fhash,Config):
-	sql_delete_did(fhash,Config.read('did'))
-	debuglog('Error: %s <==============Check Fail'%fhash)
-
-def check_pass(fhash,Config):
-	pass
+from psync_func import ConfigClass,CheckLocal_sql,CheckLocal_wget
+from psync_func import debuglog,debugset,do_sha1,obj2dst
 
 def main():
 	debugset('psync-local-check')
-	__builtin__.db = dbClassLocal()
 	cp = ConfigParser()
 	cp.read('psync.conf')
 	Config = ConfigClass()
@@ -33,21 +21,16 @@ def main():
 	Config['disttype'] = cp.get('psync_config','disttype')
 	Config['diststate'] = cp.get('psync_config','diststate')
 	Config['distserver'] = cp.get('psync_config','distserver')
-
+	Config['wget_target_url'] = cp.get('psync_local','wget_target_url')
+	
+	CheckMan = CheckLocal_sql()
 	with open('psync-local-check.input', 'r') as f:
 		lines = f.readlines()
 		total = len(lines)
 		for i in range(total):
 			fhash = lines[i].strip()
 			debuglog('%d/%d: %s'%(i,total,fhash))
-			src = obj2dst({'fhash':fhash},Config)
-			if not os.path.isfile(src):
-				check_fail(fhash,Config)
-			else:
-				if fhash == do_sha1(src):
-					check_pass(fhash,Config)
-				else:
-					check_fail(fhash,Config)
+			CheckMan.check({'fhash':fhash},Config)
 
 if __name__ == '__main__':
 	try:
