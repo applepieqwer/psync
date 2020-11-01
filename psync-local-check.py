@@ -22,8 +22,8 @@ def main():
 	Config['diststate'] = cp.get('psync_config','diststate')
 	Config['distserver'] = cp.get('psync_config','distserver')
 	Config['wget_target_url'] = cp.get('psync_local','wget_target_url')
-	
-	CheckMan = CheckLocal_sql()
+
+	CheckMan = CheckLocal_wget()
 	with open('psync-local-check.input', 'r') as f:
 		lines = f.readlines()
 		total = len(lines)
