@@ -68,6 +68,8 @@ def check_did(obj,Config):
 					return obj
 			else:
 				debuglog('fhash check is True, update did %s'%did)
+				if did not in obj['did']:
+					obj['did'].append(did)
 				return update_did(obj,Config)
 
 def do(obj,Config):
