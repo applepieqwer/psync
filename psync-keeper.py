@@ -63,15 +63,15 @@ def main():
 					MainListLen = MainListLen + 1
 			else:
 				print 'psync-keeper: No jobs from database,Sleeping 30 sec(s)'
+				print 'psync-keeper: Lazytag.....+2.'
+				MainList.append(dict(mission='lazytag'))
+				MainList.append(dict(mission='lazytag'))
+				MainListLen = MainListLen + 2
+				print 'psync-keeper: Convert.....+2.'
+				MainList.append(dict(mission='convert'))
+				MainList.append(dict(mission='convert'))
+				MainListLen = MainListLen + 2
 				sleep(30)
-				#print 'psync-keeper: Lazytag.....+2.'
-				#MainList.append(dict(mission='lazytag'))
-				#MainList.append(dict(mission='lazytag'))
-				#MainListLen = MainListLen + 2
-				#print 'psync-keeper: Convert.....+2.'
-				#MainList.append(dict(mission='convert'))
-				#MainList.append(dict(mission='convert'))
-				#MainListLen = MainListLen + 2
 		sl = 30
 		if d > 0:
 			eta = sl * MainListLen / d
