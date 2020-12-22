@@ -59,6 +59,7 @@ def rand_convert_fid(obj,Config):
 	#sleep rand time for sql server cool down
 	sleep(randint(0,5))
 	sql = "SELECT `file`.`fid` as `fid` FROM `file` left join  `file_converter` on (`file`.`fid` = `file_converter`.`fid`) right join `file_distribute` on (`file`.`fid` = `file_distribute`.`fid`) where `file_distribute`.`did`='%d' and `file_converter`.`did` is null LIMIT %d,1"%(Config.read('did'),randint(0,9)) 
+	debuglog(sql)
 	rss = db.fetchall(sql) 
 	if len(rss) > 0:
 		debuglog('rand fid found')
@@ -86,7 +87,7 @@ def do(obj,Config):
 		else:
 			return old_fid(obj,Config)
 	if mission in ['convert']:
-		if not obj.has_key('fid'):
-			return rand_convert_fid(obj,Config)
-		else:
+		if obj.has_key('fid') and obj['fid'] is not None:
 			return old_fid(obj,Config)
+		else:
+			return rand_convert_fid(obj,Config)
