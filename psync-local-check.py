@@ -34,14 +34,16 @@ def main(action,filter_fhash='',target_folder=''):
 	with open('psync-local-check.input', 'r') as f:
 		lines = f.readlines()
 		total = len(lines)
+		checked = 1
 		for i in range(total):
 			fhash = lines[i].strip()
 			if fhash.find(filter_fhash) != 0:
 				##debuglog('%d/%d: skipped'%(i,total))
 				continue
-			debuglog('%d/%d: %s'%(i,total,fhash))
+			debuglog('%d/%d: %s'%(checked,total,fhash))
 			CheckMan.check({'fhash':fhash},Config)
-
+			checked = checked + 1
+			
 if __name__ == '__main__':
 	debugset('psync-local-check')
 	filter_fhash = ''
