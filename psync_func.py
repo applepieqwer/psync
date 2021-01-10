@@ -416,6 +416,20 @@ class CheckLocal_wget(CheckLocal):
 			f.write('%s;\n'%wget(obj['fhash'],Config))
 		debuglog('CheckLocal_wget Fail: %s <==============Check Fail'%obj['fhash'])
 
+class CheckLocal_7zip(CheckLocal):
+	def __init__(self,target_folder):
+		CheckLocal.__init__(self)
+		self.target_folder = target_folder
+		pass
+	def check_pass(self,obj,Config):
+		debuglog('CheckLocal_7zip Pass')
+		filename = '7zip_log%s-%s.sh' % (date.today(),os.getpid())
+		debuglog('Save 7zip to file: %s'%filename)
+		with open(filename, 'a') as f:
+			f.write('./psync-7z.sh \"%s\" %s;\n'%(self.target_folder,hash2path(fhash)))
+	def check_fail(self,obj,Config):
+		debuglog('CheckLocal_7zip Fail: %s <==============Check Fail'%obj['fhash'])
+
 class dbClassLocal:
 	def __init__(self):
 		pass
