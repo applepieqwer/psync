@@ -8,7 +8,7 @@
 import __builtin__
 import os
 from ConfigParser import ConfigParser
-from psync_func import ConfigClass,CheckLocal_sql,CheckLocal_wget
+from psync_func import ConfigClass,CheckLocal_sql,CheckLocal_wget,CheckLocal_7zip
 from psync_func import debuglog,debugset,do_sha1,obj2dst
 import getopt
 import sys
@@ -37,7 +37,7 @@ def main(action,filter_fhash='',target_folder=''):
 		for i in range(total):
 			fhash = lines[i].strip()
 			if fhash.find(filter_fhash) != 0:
-				debuglog('%d/%d: skipped'%(i,total))
+				##debuglog('%d/%d: skipped'%(i,total))
 				continue
 			debuglog('%d/%d: %s'%(i,total,fhash))
 			CheckMan.check({'fhash':fhash},Config)
@@ -45,7 +45,7 @@ def main(action,filter_fhash='',target_folder=''):
 if __name__ == '__main__':
 	debugset('psync-local-check')
 	filter_fhash = ''
-	target_folder = ''
+	target_folder = '/tmp'
 	action = ''
 	try:
 	    options,args = getopt.getopt(sys.argv[1:],'hf:t:du:wsz', ['help','filter=','target=','download','upload=','wget','sql','7zip'])
@@ -73,11 +73,13 @@ if __name__ == '__main__':
 	    else:
 	    	print "%s usage:"%sys.argv[0]
 	    	print "-h --help       : Show this help"
-	    	print "-f --filter     : Filter for fhash(example: aa will filter aabcde)"
-	    	print "-d --download   : Download fhash list from mysql server"
-	    	print "-u --upload sql : Upload sql script file to mysql server"
-	    	print "-w --wget       : Check fhash and output wget script"
-	    	print "-s --sql        : Check fhash and output sql script"
+	    	print "-f --filter     : Filter for fhash(default: no filter. example: aa will filter aabcde)."
+	    	print "-d --download   : Download fhash list from mysql server."
+	    	print "-u --upload sql : Upload sql script file to mysql server."
+	    	print "-w --wget       : Check fhash and output wget script."
+	    	print "-s --sql        : Check fhash and output sql script."
+	    	print "-z --7zip       : Check fhash and output 7zip script."
+	    	print "-t --target     : Target folder for 7zip-ed file.(default: /tmp)"
 	    sys.exit()
 	except getopt.GetoptError:
 	    sys.exit()

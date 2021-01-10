@@ -426,7 +426,7 @@ class CheckLocal_7zip(CheckLocal):
 		filename = '7zip_log%s-%s.sh' % (date.today(),os.getpid())
 		debuglog('Save 7zip to file: %s'%filename)
 		with open(filename, 'a') as f:
-			f.write('./psync-7z.sh \"%s\" %s;\n'%(self.target_folder,hash2path(fhash)))
+			f.write('./psync-7z.sh \"%s\" %s;\n'%(self.target_folder,hash2path(obj['fhash'])))
 	def check_fail(self,obj,Config):
 		debuglog('CheckLocal_7zip Fail: %s <==============Check Fail'%obj['fhash'])
 
