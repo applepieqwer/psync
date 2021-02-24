@@ -10,7 +10,7 @@ from time import sleep
 from copy import deepcopy
 from datetime import date
 from base64 import b64encode,b64decode
-import geocoder
+#import geocoder
 
 try:
 	import cPickle as pickle
