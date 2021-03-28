@@ -50,7 +50,7 @@ if __name__ == '__main__':
 	target_folder = '/tmp'
 	action = ''
 	try:
-	    options,args = getopt.getopt(sys.argv[1:],'hf:t:du:wsz', ['help','filter=','target=','download','upload=','wget','sql','7zip'])
+	    options,args = getopt.getopt(sys.argv[1:],'hf:t:du:wszi', ['help','filter=','target=','download','upload=','wget','sql','7zip','import'])
 	    for name,value in options:
 	    	if name in ('-f','--filter'):
 	    		filter_fhash = value
@@ -69,6 +69,9 @@ if __name__ == '__main__':
 	    		sys.exit()
 	    	if name in ('-u','--upload'):
 	    		print "Upload: mysql -v --compress -upsync -p -hpsync.db.6677333.hostedresource.com psync < %s"%value
+	    		sys.exit()
+	    	if name in ('-i','--import'):
+	    		print "Import: adb devices"
 	    		sys.exit()
 	    if action != '':
 	    	main(action,filter_fhash,target_folder)

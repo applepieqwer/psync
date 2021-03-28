@@ -17,6 +17,9 @@ mkdir -p ./f
 mkdir -p ./import_root/import_from_disk
 mkdir -p ./import_root/import_from_phone
 
+mkdir -p ./scripts/
+mkdir -p ./backups/
+
 mkdir -p ./convert/0
 mkdir -p ./convert/1
 mkdir -p ./convert/2
