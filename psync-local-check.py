@@ -50,7 +50,7 @@ if __name__ == '__main__':
 	target_folder = '/tmp'
 	action = ''
 	try:
-	    options,args = getopt.getopt(sys.argv[1:],'hf:t:du:wszi', ['help','filter=','target=','download','upload=','wget','sql','7zip','import'])
+	    options,args = getopt.getopt(sys.argv[1:],'bhf:t:du:wszi', ['backup','help','filter=','target=','download','upload=','wget','sql','7zip','import'])
 	    for name,value in options:
 	    	if name in ('-f','--filter'):
 	    		filter_fhash = value
@@ -71,20 +71,35 @@ if __name__ == '__main__':
 	    		print "Upload: mysql -v --compress -upsync -p -hpsync.db.6677333.hostedresource.com psync < %s"%value
 	    		sys.exit()
 	    	if name in ('-i','--import'):
-	    		print "Import: adb devices"
+	    		print "Android device import: run \'adb devices\', and check if device shows"
+	    		print "  adb pull /sdcard/DCIM/Camera ./import_root/import_from_phone/"
+	    		print "iPhone device import:  run \'dmesg|grep iPhone\" and check if device shows"
+	    		print "  mkdir iphone"
+	    		print "  ifuse iphone"
+	    		print "  cp -r -v iphone/DCIM/ import_root/import_from_phone/iphone/"
+	    		print "  sudo umount iphone"
+	    		print "  rm -r iphone"
+	    		sys.exit()
+	    	if name in ('-b','--backup'):
+	    		print "Bakcup:"
+	    		print "  sh psync-backup-db.sh"
+	    		print "  cd ~"
+	    		print "  rsync -av QuickData/psync/ Data/psync"
 	    		sys.exit()
 	    if action != '':
 	    	main(action,filter_fhash,target_folder)
 	    else:
 	    	print "%s usage:"%sys.argv[0]
-	    	print "-h --help       : Show this help"
-	    	print "-f --filter     : Filter for fhash(default: no filter. example: aa will filter aabcde)."
+	    	print "-b --backup     : Run backup script, include backup sql and rsync"
 	    	print "-d --download   : Download fhash list from mysql server."
+	    	print "-f --filter     : Filter for fhash(default: no filter. example: aa will filter aabcde)."
+	    	print "-h --help       : Show this help"
+	    	print "-i --import     : Show import scripts"
+	    	print "-s --sql        : Check fhash and output sql script."
+	    	print "-t --target     : Target folder for 7zip-ed file.(default: /tmp)"
 	    	print "-u --upload sql : Upload sql script file to mysql server."
 	    	print "-w --wget       : Check fhash and output wget script."
-	    	print "-s --sql        : Check fhash and output sql script."
 	    	print "-z --7zip       : Check fhash and output 7zip script."
-	    	print "-t --target     : Target folder for 7zip-ed file.(default: /tmp)"
 	    sys.exit()
 	except getopt.GetoptError:
 	    sys.exit()
