@@ -94,7 +94,7 @@ if __name__ == '__main__':
 	    	print "-d --download   : Download fhash list from mysql server."
 	    	print "-f --filter     : Filter for fhash(default: no filter. example: aa will filter aabcde)."
 	    	print "-h --help       : Show this help"
-	    	print "-i --import     : Show import scripts"
+	    	print "-i --import     : Show import scripts for Android and iPhone"
 	    	print "-s --sql        : Check fhash and output sql script."
 	    	print "-t --target     : Target folder for 7zip-ed file.(default: /tmp)"
 	    	print "-u --upload sql : Upload sql script file to mysql server."
