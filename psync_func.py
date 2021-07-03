@@ -1,8 +1,7 @@
-import mysql.connector
+
 from collections import deque
 from os import getpid,remove,lstat
 import os
-import exifread as exifreader
 import __builtin__
 from hashlib import sha1
 import json
@@ -10,7 +9,22 @@ from time import sleep
 from copy import deepcopy
 from datetime import date
 from base64 import b64encode,b64decode
-#import geocoder
+import requests
+
+try:
+	import mysql.connector
+except:
+	print "import mysql.connector error"
+
+try:
+	import exifread as exifreader
+except:
+	print "import exifread error"
+
+try:
+	import geocoder
+except:
+	print "import geocoder error"
 
 try:
 	import cPickle as pickle
@@ -549,3 +563,43 @@ class dbClass(dbClassLocal):
 				success = False
 				debuglog('Execute SQL OperationalError, Retry')
 		return deepcopy(r)
+
+
+#///////////www.fly19.net API/////////
+def callback_msg(msg):
+	debuglog(msg)
+
+def callback_null(msg):
+	debuglog('callback_null')
+
+def _default_success_callback(data):
+	debuglog('_default_success_callback')
+	#debuglog(data.json())
+	j = data.json()
+	if 'status' in j.keys() and j['status'] == 0:
+		if 'callback' in j.keys() and j['callback']!='':
+			_callback = j['callback']
+			exec "%s(j['payload'])"%_callback
+		else:
+			debuglog('no callback func name found, use callback_msg')
+			callback_msg(j['payload'])
+	else:
+		debuglog('status is wrong, use _default_error_callback')
+		_default_error_callback(data)
+
+
+def _default_error_callback(data):
+	debuglog('_default_error_callback')
+	debuglog(data)
+
+def go_api(action,payload,Config,success_callback=_default_success_callback,error_callback=_default_error_callback):
+	url = Config.read('psync_api_url')
+	post_data = {'action':action, 'payload':payload}
+	try:
+		r = requests.post(url, json=post_data)
+	except Exception as e:
+		error_callback(r)
+	else:
+		success_callback(r)
+
+	

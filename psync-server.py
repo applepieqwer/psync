@@ -34,6 +34,8 @@ if __name__ == '__main__':
 		Config['baidu_key'] = cp.get('psync_gps','baidu_key')
 		#DB = dbClass(Config) # go for mysql
 
+		Config['psync_api_url'] = cp.get('psync_api','psync_api_url')
+
 		L2S = ListClass() # list to search
 		MainList = ListClass() # main list
 
