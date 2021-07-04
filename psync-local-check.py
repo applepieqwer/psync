@@ -13,7 +13,13 @@ from psync_func import debuglog,debugset,do_sha1,obj2dst
 import getopt
 import sys
 
-def main(action,filter_fhash='',target_folder=''):
+def main(action,input_file,output_file,filter_fhash='',target_folder=''):
+	debuglog('action: %s'%action)
+	debuglog('input_file: %s'%input_file)
+	debuglog('output_file: %s'%output_file)
+	debuglog('filter_fhash: %s'%filter_fhash)
+	debuglog('target_folder: %s'%target_folder)
+
 	cp = ConfigParser()
 	cp.read('psync.conf')
 	Config = ConfigClass()
@@ -31,7 +37,7 @@ def main(action,filter_fhash='',target_folder=''):
 		CheckMan = CheckLocal_sql()
 	if action == '7zip':
 		CheckMan = CheckLocal_7zip(target_folder=target_folder)
-	with open('psync-local-check.input', 'r') as f:
+	with open(input_file, 'r') as f:
 		lines = f.readlines()
 		total = len(lines)
 		checked = 1
@@ -41,17 +47,28 @@ def main(action,filter_fhash='',target_folder=''):
 				##debuglog('%d/%d: skipped'%(i,total))
 				continue
 			debuglog('%d/%d: %s'%(checked,total,fhash))
-			CheckMan.check({'fhash':fhash},Config)
+			r = CheckMan.check({'fhash':fhash},Config)
 			checked = checked + 1
+			if(not r): #check fail ,append fhash to output_file
+				with open(output_file, 'a') as f:
+					f.write('%s;\n'%fhash)
 			
 if __name__ == '__main__':
 	debugset('psync-local-check')
 	filter_fhash = ''
 	target_folder = '/tmp'
 	action = ''
+	input_file = 'psync-local-check.input'  #default:'psync-local-check.input'
+	output_file = '/dev/null' #default:/dev/null
 	try:
-	    options,args = getopt.getopt(sys.argv[1:],'bhf:t:du:wszi', ['backup','help','filter=','target=','download','upload=','wget','sql','7zip','import'])
+	    options,args = getopt.getopt(sys.argv[1:],'IObhf:t:du:wszi', ['input=','output=','backup','help','filter=','target=','download','upload=','wget','sql','7zip','import'])
 	    for name,value in options:
+	    	if name in ('-I','--input'):
+	    		input_file = value
+	    		debuglog('input_file: %s'%value)
+	    	if name in ('-O','--output'):
+	    		output_file = value
+	    		debuglog('output_file: %s'%value)
 	    	if name in ('-f','--filter'):
 	    		filter_fhash = value
 	    		debuglog('filter_fhash: %s'%value)
@@ -87,9 +104,12 @@ if __name__ == '__main__':
 	    		print "  rsync -av QuickData/psync/ Data/psync"
 	    		sys.exit()
 	    if action != '':
-	    	main(action,filter_fhash,target_folder)
+
+	    	main(action,input_file,output_file,filter_fhash,target_folder)
 	    else:
 	    	print "%s usage:"%sys.argv[0]
+	    	print "-I --input      : Input file, default:psync-local-check.input"
+	    	print "-O --output     : Output file, fhash checked fail result, default:/dev/null"
 	    	print "-b --backup     : Run backup script, include backup sql and rsync"
 	    	print "-d --download   : Download fhash list from mysql server."
 	    	print "-f --filter     : Filter for fhash(default: no filter. example: aa will filter aabcde)."
