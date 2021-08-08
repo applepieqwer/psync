@@ -24,8 +24,10 @@ if __name__ == '__main__':
 			main(url,action,payload)
 		else:
 			print "%s usage:"%sys.argv[0]
-			print "-a --action      : API action, default:echo"
-			print "-p --payload     : API payload, default:\"msg\":\"hello world\""
+			print "    -a --action      : API action, default:echo"
+			print "    -p --payload     : API payload, default:\"msg\":\"hello world\""
+			print "example:"
+			print "    python psync-api.py -a \'wxpusher.push\' -p \'\"content\":\"hello world\"\'"
 			sys.exit()
 	except getopt.GetoptError:
 		sys.exit()
