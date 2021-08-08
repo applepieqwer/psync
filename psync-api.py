@@ -30,4 +30,5 @@ if __name__ == '__main__':
 			print "    python psync-api.py -a \'wxpusher.push\' -p \'\"content\":\"hello world\"\'"
 			sys.exit()
 	except getopt.GetoptError:
+		print "%s: getopt.GetoptError"%sys.argv[0]
 		sys.exit()
