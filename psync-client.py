@@ -74,8 +74,8 @@ def main():
 					#	MainList.append(obj)
 					#	break
 		else:
-			print "psync-client: nothing to do....sleeping"
-			sleep(10)
+			print "psync-client: nothing to do....exit"
+			exit()
 
 	
 

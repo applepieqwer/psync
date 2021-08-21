@@ -14,18 +14,22 @@ if __name__ == '__main__':
 	action = ''
 	payload = 'null'
 	try:
-		options,args = getopt.getopt(sys.argv[1:],'a:p:', ['action=','payload='])
+		options,args = getopt.getopt(sys.argv[1:],'a:p:J', ['action=','payload='])
 		for name,value in options:
 			if name in ('-a','--action'):
 				action = value
 			if name in ('-p','--payload'):
 				payload = value
+			if name in ('-J'):
+				action = 'wxpusher.push'
+				payload = '\"content\":\"Job Done.\"'
 		if action != '':
 			main(url,action,payload)
 		else:
 			print "%s usage:"%sys.argv[0]
 			print "    -a --action      : API action, default:echo"
 			print "    -p --payload     : API payload, default:\"msg\":\"hello world\""
+			print "    -J               : Send \"Job Done\" with wxpusher"
 			print "example:"
 			print "    python psync-api.py -a \'wxpusher.push\' -p \'\"content\":\"hello world\"\'"
 			sys.exit()
