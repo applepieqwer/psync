@@ -13,6 +13,18 @@ if sys.getdefaultencoding() != defaultencoding:
 	reload(sys)
 	sys.setdefaultencoding(defaultencoding)
 
+def load_jobs_from_api(Config):
+	try:
+		cmd = 'python psync-api.py -a \'todo.get100\' -p \'"did":' + str(Config.get('did')) + '\''
+		print 'psync-keeper:',cmd
+		c = os.popen(cmd)
+		r = jsonDecode(c.read())
+		c.close()
+		return r['payload']['data']
+	except:
+		print 'psync-keeper: Error'
+		return list()
+
 
 def load_jobs_from_url(Config):
 	#load objs form database tablename
@@ -55,7 +67,7 @@ def main():
 		print("psync-keeper: MainList.length = %d."%MainListLen)
 		d = LastLen - MainListLen
 		if MainListLen * 2 - LastLen < 10:
-			todo_jobs = load_jobs_from_url(Config)
+			todo_jobs = load_jobs_from_api(Config)
 			if len(todo_jobs) > 0:
 				for job in todo_jobs:
 					print 'psync-keeper: from todo_jobs/%s[%s].'%(job['fid'],job['mission'])

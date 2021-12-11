@@ -14,8 +14,10 @@ if __name__ == '__main__':
 	action = ''
 	payload = 'null'
 	try:
-		options,args = getopt.getopt(sys.argv[1:],'a:p:J', ['action=','payload='])
+		options,args = getopt.getopt(sys.argv[1:],'a:p:Jh', ['action=','payload='])
 		for name,value in options:
+			if name in ('-h','--help'):
+				action = ''
 			if name in ('-a','--action'):
 				action = value
 			if name in ('-p','--payload'):
