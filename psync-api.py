@@ -1,6 +1,7 @@
 from psync_func import go_api
 import getopt
 import sys
+import json
 
 if __name__ == '__main__':
 	action = ''
@@ -13,10 +14,10 @@ if __name__ == '__main__':
 			if name in ('-a','--action'):
 				action = value
 			if name in ('-p','--payload'):
-				payload = value
+				payload = json.loads(value)
 			if name in ('-J'):
 				action = 'wxpusher.push'
-				payload = '{\"content\":\"Job Done.\"}'
+				payload = {"content":"Job Done."}
 		if action != '':
 			r = go_api(action,payload)
 			print r
