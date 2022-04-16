@@ -10,6 +10,7 @@ from copy import deepcopy
 from datetime import date
 from base64 import b64encode,b64decode
 import requests
+from ConfigParser import ConfigParser
 
 try:
 	import mysql.connector
@@ -594,7 +595,8 @@ def _default_error_callback(data):
 
 def go_api(action,payload,Config,success_callback=_default_success_callback,error_callback=_default_error_callback):
 	url = Config.read('psync_api_url')
-	post_data = {'action':action, 'payload':payload}
+	token = Config.read('psync_api_token')
+	post_data = {"action":action,"token":token,"payload":payload}
 	try:
 		r = requests.post(url, json=post_data)
 	except Exception as e:
@@ -602,4 +604,19 @@ def go_api(action,payload,Config,success_callback=_default_success_callback,erro
 	else:
 		success_callback(r)
 
-	
+def go_api(action,payload):
+	#direct read, direct output
+	cp = ConfigParser()
+	cp.read('psync.conf')
+	url = cp.get('psync_api','psync_api_url')
+	token = cp.get('psync_api','psync_api_token')
+	d = {"action":action,"token":token,"payload":payload}
+	try:
+		cmd = 'curl --silent -H \"Accept: application/json\" -H \"Content-type: application/json\" -X POST -d \'%s\' %s'%(json.dumps(d),url)
+		#print cmd
+		result = os.popen(cmd).read()
+		return json.loads(result)
+	except Exception as e:
+		debugset('api')
+		debuglog('go_api error:%s, curl result:%s'%(e,result))
+		raise e

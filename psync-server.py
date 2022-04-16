@@ -35,6 +35,7 @@ if __name__ == '__main__':
 		#DB = dbClass(Config) # go for mysql
 
 		Config['psync_api_url'] = cp.get('psync_api','psync_api_url')
+		Config['psync_api_token'] = cp.get('psync_api','psync_api_token')
 
 		L2S = ListClass() # list to search
 		MainList = ListClass() # main list
