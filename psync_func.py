@@ -97,6 +97,7 @@ class ConfigClass(dict):
 		self['mysql_passwd'] = self._cp.get('psync_config','mysql_passwd')
 		self['mysql_db'] = self._cp.get('psync_config','mysql_db')
 		self['baidu_key'] = self._cp.get('psync_gps','baidu_key')
+		self['psync_api_host'] = self._cp.get('psync_api','psync_api_host')
 		self['psync_api_url'] = self._cp.get('psync_api','psync_api_url')
 		self['psync_api_token'] = self._cp.get('psync_api','psync_api_token')
 	def read(self,key):
@@ -589,7 +590,7 @@ class dbClass(dbClassLocal):
 
 
 #///////////www.fly19.net API/////////
-class apiClass(dict):
+class ApiClass(dict):
 	STATUS_OK = 0
 	STATUS_ERR = -1
 	STATUS_FATAL_ARR = -2
@@ -597,7 +598,6 @@ class apiClass(dict):
 	def __init__(self, Config):
 		super(dict, self).__init__()
 		self.Config = Config
-
 	def go_api(self,action,payload):
 		url = self.Config.read('psync_api_url')
 		token = self.Config.read('psync_api_token')
@@ -609,9 +609,14 @@ class apiClass(dict):
 			self.update(json.loads(result))
 		except Exception as e:
 			self.update({'status':self.STATUS_FATAL_ARR,'payload':{}})
+	def status(self):
+		return self['status']
+	def is_ok(self):
+		return (self['status'] == self.STATUS_OK)
+
 
 def go_api(action,payload={}):
-	#direct read, direct output
+	#direct api, direct output
 	cp = ConfigParser()
 	cp.read('psync.conf')
 	url = cp.get('psync_api','psync_api_url')

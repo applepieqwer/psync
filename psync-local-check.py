@@ -8,7 +8,7 @@
 import __builtin__
 import os
 from psync_func import ConfigClass,CheckLocal_sql,CheckLocal_wget,CheckLocal_7zip
-from psync_func import debuglog,debugset,do_sha1,obj2dst,go_api
+from psync_func import debuglog,debugset,do_sha1,obj2dst,ApiClass
 import getopt
 import sys
 
@@ -20,7 +20,16 @@ def main(action,input_file,output_file,filter_fhash='',target_folder=''):
 	debuglog('target_folder: %s'%target_folder)
 
 	Config = ConfigClass()
-
+	Api = ApiClass(Config)
+	if action == 'download':
+		Api.go_api('file.dump',{'f':filter_fhash})
+		if Api.is_ok():
+			cmd = 'wget -O %s \'%s/%s\''%(output_file,Config.read('psync_api_host'),Api['payload']['fhash'])
+			print cmd
+			return os.popen(cmd).read()
+		else:
+			debuglog('Api Error')
+			return False
 	if action == 'wget':
 		CheckMan = CheckLocal_wget()
 	if action == 'sql':
@@ -51,7 +60,7 @@ if __name__ == '__main__':
 	input_file = 'psync-local-check.input'  #default:'psync-local-check.input'
 	output_file = '/dev/null' #default:/dev/null
 	try:
-	    options,args = getopt.getopt(sys.argv[1:],'IObhf:t:du:wszi', ['input=','output=','backup','help','filter=','target=','download','upload=','wget','sql','7zip','import'])
+	    options,args = getopt.getopt(sys.argv[1:],'-I:-O:-b-h-F:-t:-d-u:-w-s-z-i', ['input=','output=','backup','help','filter=','target=','download','upload=','wget','sql','7zip','import'])
 	    for name,value in options:
 	    	if name in ('-I','--input'):
 	    		input_file = value
@@ -59,7 +68,7 @@ if __name__ == '__main__':
 	    	if name in ('-O','--output'):
 	    		output_file = value
 	    		debuglog('output_file: %s'%value)
-	    	if name in ('-f','--filter'):
+	    	if name in ('-F','--filter'):
 	    		filter_fhash = value
 	    		debuglog('filter_fhash: %s'%value)
 	    	if name in ('-t','--target'):
@@ -73,9 +82,7 @@ if __name__ == '__main__':
 	    		action = '7zip'
 	    	if name in ('-d','--download'):
 	    		#print "Download: mysql --compress -upsync -p -hpsync.db.6677333.hostedresource.com psync -ss -e 'SELECT `fhash` FROM `file`;' | sed 's/\\t/\",\"/g;s/^//;s/$//;s/\\n//g' > psync-local-check.input"
-	    		r = go_api('file.dump')
-
-	    		sys.exit()
+	    		action = 'download'
 	    	if name in ('-u','--upload'):
 	    		print "Upload: mysql -v --compress -upsync -p -hpsync.db.6677333.hostedresource.com psync < %s"%value
 	    		sys.exit()
@@ -96,15 +103,14 @@ if __name__ == '__main__':
 	    		print "  rsync -av QuickData/psync/ Data/psync"
 	    		sys.exit()
 	    if action != '':
-
 	    	main(action,input_file,output_file,filter_fhash,target_folder)
 	    else:
 	    	print "%s usage:"%sys.argv[0]
 	    	print "-I --input      : Input file, default:psync-local-check.input"
 	    	print "-O --output     : Output file, fhash checked fail result, default:/dev/null"
 	    	print "-b --backup     : Run backup script, include backup sql and rsync"
-	    	print "-d --download   : Download fhash list from mysql server."
-	    	print "-f --filter     : Filter for fhash(default: no filter. example: aa will filter aabcde)."
+	    	print "-d --download   : Download fhash list from mysql server and save to Output file. "
+	    	print "-F --filter     : Filter for fhash(default: no filter. example: aa will filter aabcde)."
 	    	print "-h --help       : Show this help"
 	    	print "-i --import     : Show import scripts for Android and iPhone"
 	    	print "-s --sql        : Check fhash and output sql script."
