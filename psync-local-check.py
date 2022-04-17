@@ -25,7 +25,7 @@ def main(action,input_file,output_file,filter_fhash='',target_folder=''):
 		Api.go_api('file.dump',{'f':filter_fhash})
 		if Api.is_ok():
 			cmd = 'wget -O %s \'%s/%s\''%(output_file,Config.read('psync_api_host'),Api['payload']['fhash'])
-			print cmd
+			#print cmd
 			return os.popen(cmd).read()
 		else:
 			debuglog('Api Error')
