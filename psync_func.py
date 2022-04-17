@@ -75,8 +75,30 @@ def saveEncoding(face_data,Config):
 	writefile = open(filename, 'wb')
 	pickle.dump(buf,writefile,-1)
 	writefile.close()
-
+		
 class ConfigClass(dict):
+	def __init__(self):
+		super(dict, self).__init__()
+		#read all config data
+		self._cp = ConfigParser()
+		self._cp.read('psync.conf')
+		self['endswith'] = eval(self._cp.get('psync_config','endswith'))
+		self['search_root'] = self._cp.get('psync_config','search_root')
+		self['data_root'] = self._cp.get('psync_config','data_root')
+		self['did'] = self._cp.get('psync_config','did')
+		self['distname'] = self._cp.get('psync_config','distname')
+		self['disttype'] = self._cp.get('psync_config','disttype')
+		self['diststate'] = self._cp.get('psync_config','diststate')
+		self['distserver'] = self._cp.get('psync_config','distserver')
+		self['todo_jobs_url'] = self._cp.get('psync_web_config','todo_jobs_url')
+		self['wget_jobs_url'] = self._cp.get('psync_web_config','wget_jobs_url')
+		self['mysql_host'] = self._cp.get('psync_config','mysql_host')
+		self['mysql_user'] = self._cp.get('psync_config','mysql_user')
+		self['mysql_passwd'] = self._cp.get('psync_config','mysql_passwd')
+		self['mysql_db'] = self._cp.get('psync_config','mysql_db')
+		self['baidu_key'] = self._cp.get('psync_gps','baidu_key')
+		self['psync_api_url'] = self._cp.get('psync_api','psync_api_url')
+		self['psync_api_token'] = self._cp.get('psync_api','psync_api_token')
 	def read(self,key):
 		return self.get(key)
 
@@ -567,44 +589,28 @@ class dbClass(dbClassLocal):
 
 
 #///////////www.fly19.net API/////////
-def callback_msg(msg):
-	debuglog(msg)
+class apiClass(dict):
+	STATUS_OK = 0
+	STATUS_ERR = -1
+	STATUS_FATAL_ARR = -2
 
-def callback_null(msg):
-	debuglog('callback_null')
+	def __init__(self, Config):
+		super(dict, self).__init__()
+		self.Config = Config
 
-def _default_success_callback(data):
-	debuglog('_default_success_callback')
-	#debuglog(data.json())
-	j = data.json()
-	if 'status' in j.keys() and j['status'] == 0:
-		if 'callback' in j.keys() and j['callback']!='':
-			_callback = j['callback']
-			exec "%s(j['payload'])"%_callback
-		else:
-			debuglog('no callback func name found, use callback_msg')
-			callback_msg(j['payload'])
-	else:
-		debuglog('status is wrong, use _default_error_callback')
-		_default_error_callback(data)
+	def go_api(self,action,payload):
+		url = self.Config.read('psync_api_url')
+		token = self.Config.read('psync_api_token')
+		d = {"action":action,"token":token,"payload":payload}
+		try:
+			cmd = 'curl --silent -H \"Accept: application/json\" -H \"Content-type: application/json\" -X POST -d \'%s\' %s'%(json.dumps(d),url)
+			#print cmd
+			result = os.popen(cmd).read()
+			self.update(json.loads(result))
+		except Exception as e:
+			self.update({'status':self.STATUS_FATAL_ARR,'payload':{}})
 
-
-def _default_error_callback(data):
-	debuglog('_default_error_callback')
-	debuglog(data)
-
-def go_api(action,payload,Config,success_callback=_default_success_callback,error_callback=_default_error_callback):
-	url = Config.read('psync_api_url')
-	token = Config.read('psync_api_token')
-	post_data = {"action":action,"token":token,"payload":payload}
-	try:
-		r = requests.post(url, json=post_data)
-	except Exception as e:
-		error_callback(r)
-	else:
-		success_callback(r)
-
-def go_api(action,payload):
+def go_api(action,payload={}):
 	#direct read, direct output
 	cp = ConfigParser()
 	cp.read('psync.conf')

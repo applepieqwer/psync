@@ -7,9 +7,8 @@
 
 import __builtin__
 import os
-from ConfigParser import ConfigParser
 from psync_func import ConfigClass,CheckLocal_sql,CheckLocal_wget,CheckLocal_7zip
-from psync_func import debuglog,debugset,do_sha1,obj2dst
+from psync_func import debuglog,debugset,do_sha1,obj2dst,go_api
 import getopt
 import sys
 
@@ -20,16 +19,7 @@ def main(action,input_file,output_file,filter_fhash='',target_folder=''):
 	debuglog('filter_fhash: %s'%filter_fhash)
 	debuglog('target_folder: %s'%target_folder)
 
-	cp = ConfigParser()
-	cp.read('psync.conf')
 	Config = ConfigClass()
-	Config['data_root'] = cp.get('psync_config','data_root')
-	Config['did'] = cp.getint('psync_config','did')
-	Config['distname'] = cp.get('psync_config','distname')
-	Config['disttype'] = cp.get('psync_config','disttype')
-	Config['diststate'] = cp.get('psync_config','diststate')
-	Config['distserver'] = cp.get('psync_config','distserver')
-	Config['wget_target_url'] = cp.get('psync_local','wget_target_url')
 
 	if action == 'wget':
 		CheckMan = CheckLocal_wget()
@@ -82,7 +72,9 @@ if __name__ == '__main__':
 	    	if name in ('-z','--7zip'):
 	    		action = '7zip'
 	    	if name in ('-d','--download'):
-	    		print "Download: mysql --compress -upsync -p -hpsync.db.6677333.hostedresource.com psync -ss -e 'SELECT `fhash` FROM `file`;' | sed 's/\\t/\",\"/g;s/^//;s/$//;s/\\n//g' > psync-local-check.input"
+	    		#print "Download: mysql --compress -upsync -p -hpsync.db.6677333.hostedresource.com psync -ss -e 'SELECT `fhash` FROM `file`;' | sed 's/\\t/\",\"/g;s/^//;s/$//;s/\\n//g' > psync-local-check.input"
+	    		r = go_api('file.dump')
+
 	    		sys.exit()
 	    	if name in ('-u','--upload'):
 	    		print "Upload: mysql -v --compress -upsync -p -hpsync.db.6677333.hostedresource.com psync < %s"%value
