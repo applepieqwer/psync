@@ -36,7 +36,7 @@ def main():
 	#loop
 	while True:
 		if MainList.length():
-			obj = MainList.popleft()
+			obj = MainList.get()
 			if obj is None:
 				continue
 			if obj['mission'] == '' or obj['mission'] == 'done':
@@ -65,13 +65,13 @@ def main():
 						debuglog('ERROR: %s TypeError %s'%(todo,e))
 						print obj
 						print 'DUMP DONE'
-						MainList.append(obj)
+						MainList.put(obj)
 						break
 					#except:
 					#	debuglog('ERROR: %s Unknown Error'%todo)
 					#	print obj
 					#	print 'DUMP DONE'
-					#	MainList.append(obj)
+					#	MainList.put(obj)
 					#	break
 		else:
 			print "psync-client: nothing to do....exit"

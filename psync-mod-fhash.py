@@ -34,9 +34,25 @@ def old_fhash(obj,Config):
 	return obj
 
 def do(obj,Config):
-	mission = obj['mission']
-	if mission in ['import']:
-		return new_fhash(obj,Config)
-	if mission in ['lazytag','lazycheck','convert','lazygps']:
-		return old_fhash(obj,Config)
-	return obj
+	if obj.has_key('src'):
+		src = obj['src']
+	else:
+		if obj.has_key('fhash'):
+			src = obj2dst(obj,Config)
+		else:
+			raise UserWarning,'src or fhash not set'
+			return obj
+	if not os.path.isfile(src):
+		obj['fhashcheck'] = False
+		raise UserWarning,'file not found'
+		return obj
+	else:
+		new_fhash = do_sha1(src)
+		if obj.has_key('fhash') and obj['fhash'] != new_fhash:
+			obj['fhashcheck'] = False
+			raise UserWarning,'fhash check failed'
+			return obj
+		else:
+			obj['fhash'] = new_fhash
+			obj['fhashcheck'] = True
+			return obj

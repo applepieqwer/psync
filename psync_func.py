@@ -1,5 +1,6 @@
 
 from collections import deque
+from queue import Queue
 from os import getpid,remove,lstat
 import os
 import __builtin__
@@ -103,9 +104,9 @@ class ConfigClass(dict):
 	def read(self,key):
 		return self.get(key)
 
-class ListClass(deque):
+class ListClass(Queue):
 	def length(self):
-		return len(self)
+		return self.qsize()
 	def __str__(self):
 		return super().__str__(self)
 

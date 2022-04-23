@@ -1,5 +1,4 @@
 from multiprocessing.managers import BaseManager
-from ConfigParser import ConfigParser
 from psync_func import ConfigClass,ListClass
 from psync_func import debuglog,debugset
 
@@ -9,16 +8,15 @@ class MyManager(BaseManager):
 if __name__ == '__main__':
 	try:
 		debugset('psync-server')
-
 		Config = ConfigClass()
-
 		L2S = ListClass() # list to search
-		MainList = ListClass() # main list
-
-		L2S.append(Config['search_root'])
+		MainList = ListClass() # main jobs list
+		DoneList = ListClass() # jobs done list
+		L2S.put(Config['search_root'])
 
 		MyManager.register('List2Search',callable=lambda:L2S)
 		MyManager.register('MainList',callable=lambda:MainList)
+		MyManager.register('DoneList',callable=lambda:DoneList)
 		MyManager.register('Config',callable=lambda:Config)
 		#MyManager.register('DB',callable=lambda:DB)
 
