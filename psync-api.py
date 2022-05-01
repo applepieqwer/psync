@@ -3,6 +3,11 @@ import getopt
 import sys
 import json
 
+defaultencoding = 'utf-8'
+if sys.getdefaultencoding() != defaultencoding:
+	reload(sys)
+	sys.setdefaultencoding(defaultencoding)
+
 if __name__ == '__main__':
 	action = ''
 	payload = 'null'
