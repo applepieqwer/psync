@@ -1,5 +1,5 @@
 from multiprocessing.managers import BaseManager,Process
-from psync_func import ConfigClass,ListClass,ApiClass
+from psync_func import ConfigClass,ListClass,ApiClass,StatusClass
 from psync_func import debuglog,debugset
 import os
 from time import sleep
@@ -18,6 +18,7 @@ def manager_proc():
 		debugset('psync-server/manager_proc')
 		debuglog('setup Manager')
 		Config = ConfigClass()
+		Status = StatusClass()
 		L2S = ListClass() # list to search
 		MainList = ListClass() # main jobs list
 		DoneList = ListClass() # jobs done list
@@ -27,6 +28,7 @@ def manager_proc():
 		MyManager.register('MainList',callable=lambda:MainList)
 		MyManager.register('DoneList',callable=lambda:DoneList)
 		MyManager.register('Config',callable=lambda:Config)
+		MyManager.register('Status',callable=lambda:Status)
 		#MyManager.register('DB',callable=lambda:DB)
 
 		manager = MyManager(address=('', 50000), authkey='1111')
@@ -41,22 +43,32 @@ def manager_proc():
 def reporter_proc():
 	try:
 		debugset('psync-server/reporter_proc')
+		pid = os.getpid()
 		debuglog('connecting Manager')
 		MyManager.register('List2Search')
 		MyManager.register('MainList')
 		MyManager.register('DoneList')
 		MyManager.register('Config')
+		MyManager.register('Status')
+
 		reporter = MyManager(address=('', 50000), authkey='1111')
 		reporter.connect()
 		L2S = reporter.List2Search()
 		MainList = reporter.MainList()
 		Config = reporter.Config()
+		DoneList = reporter.DoneList()
+		Status = reporter.Status()
 
 		api = ApiClass(Config)
-		diststate = {'mainlist.length':MainList.length()}
 		while True:
-			debuglog('MainList: %d'%MainList.length())
-			api.go_api('distribute.update',{'did':Config.read('did'),'diststate':diststate})
+			Status.reporter_status(pid,{
+				'mainlist.length':MainList.length(),
+				'searchlist.length':L2S.length(),
+				'donelist.length':DoneList.length(),
+				})
+			r = Status.read_all()
+			debuglog(r)
+			api.go_api('distribute.update',{'did':Config.read('did'),'diststate':r})
 			sleep(15)
 	except Exception as e:
 		debuglog('reporter_proc Exception, exit.')

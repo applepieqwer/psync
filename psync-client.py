@@ -3,6 +3,7 @@ from time import sleep
 from psync_func import debuglog,debugset,dbClass
 import __builtin__
 import sys
+import os
 
 defaultencoding = 'utf-8'
 if sys.getdefaultencoding() != defaultencoding:
@@ -13,9 +14,12 @@ class MyManager(BaseManager):
 	pass
 
 def main():
+	pid = os.getpid()
 	debugset('main')
 	#make connect to python server
 	MyManager.register('MainList')
+	MyManager.register('DoneList')
+	MyManager.register('Status')
 	MyManager.register('Config')
 	#MyManager.register('DB')
 
@@ -23,6 +27,8 @@ def main():
 	manager.connect()
 	MainList = manager.MainList()
 	Config = manager.Config()
+	DoneList = manager.DoneList()
+	Status = manager.Status()
 	__builtin__.db = dbClass(Config)
 	
 	#define Mission roadmap
@@ -35,6 +41,7 @@ def main():
 
 	#loop
 	while True:
+		Status.client_status(pid,'loop')
 		if MainList.length():
 			obj = MainList.get()
 			if obj is None:
@@ -74,8 +81,10 @@ def main():
 					#	MainList.put(obj)
 					#	break
 		else:
+			Status.client_status(pid,'nothing to do....exit')
 			print "psync-client: nothing to do....exit"
-			exit()
+			sleep(10)
+			#####exit()
 
 	
 

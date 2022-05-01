@@ -6,7 +6,7 @@ import os
 import __builtin__
 from hashlib import sha1
 import json
-from time import sleep
+from time import sleep,time
 from copy import deepcopy
 from datetime import date
 from base64 import b64encode,b64decode
@@ -77,6 +77,37 @@ def saveEncoding(face_data,Config):
 	pickle.dump(buf,writefile,-1)
 	writefile.close()
 		
+class StatusClass(dict):
+	"""the status of server"""
+	def __init__(self):
+		super(dict, self).__init__()
+		self['clients']={}
+		self['clients_pid_list']=deque(maxlen=10)  #max 10 clients
+		self['reporter']={}
+	def read(self,key):
+		return self.get(key)
+	def read_all(self):
+		r = {}
+		r['reporter'] = deepcopy(self['reporter'])
+		r['clients_pid_list']=list(self['clients_pid_list'])
+		r['clients'] = {}
+		for pid in self['clients'].keys():
+			if pid in r['clients_pid_list']:
+				r['clients'][pid] = list(self['clients'][pid])
+			else:
+				del self['clients'][pid]
+		return r
+	def client_status(self,pid,status):
+		if pid in self['clients_pid_list']:
+			self['clients'][pid].append({'time':time(),'status':status})
+		else:
+			self['clients_pid_list'].append(pid)
+			self['clients'][pid] = deque(maxlen=5)  #max 5 msgs for 1 client
+			self['clients'][pid].append({'time':time(),'status':status})
+		return len(self['clients'][pid])
+	def reporter_status(self,pid,status):
+		self['reporter'].update({pid:status})
+
 class ConfigClass(dict):
 	def __init__(self):
 		super(dict, self).__init__()
