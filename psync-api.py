@@ -25,7 +25,7 @@ if __name__ == '__main__':
 				payload = {"content":"Job Done."}
 		if action != '':
 			r = go_api(action,payload)
-			print r
+			print json.dumps(r,indent=2,separators=(',',':'))
 			sys.exit()
 		else:
 			print "%s usage:"%sys.argv[0]

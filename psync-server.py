@@ -1,5 +1,5 @@
 from multiprocessing.managers import BaseManager,Process
-from psync_func import ConfigClass,ListClass,ApiClass,StatusClass
+from psync_func import ConfigClass,ListClass,ApiClass,StatusClass,ConfigRemoteClass
 from psync_func import debuglog,debugset
 import os
 from time import sleep
@@ -17,7 +17,10 @@ def manager_proc():
 	try:
 		debugset('psync-server/manager_proc')
 		debuglog('setup Manager')
-		Config = ConfigClass()
+		debuglog('reading local config')
+		Config = ConfigRemoteClass()
+		debuglog('reading remote config')
+		Config.read_remote_config()
 		Status = StatusClass()
 		L2S = ListClass() # list to search
 		MainList = ListClass() # main jobs list

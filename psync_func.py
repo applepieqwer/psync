@@ -110,7 +110,8 @@ class StatusClass(dict):
 
 class ConfigClass(dict):
 	def __init__(self):
-		super(dict, self).__init__()
+		print 'ConfigClass init'
+		super(ConfigClass, self).__init__()
 		#read all config data
 		self._cp = ConfigParser()
 		self._cp.read('psync.conf')
@@ -133,7 +134,26 @@ class ConfigClass(dict):
 		self['psync_api_url'] = self._cp.get('psync_api','psync_api_url')
 		self['psync_api_token'] = self._cp.get('psync_api','psync_api_token')
 	def read(self,key):
-		return self.get(key)
+		return self.get(key)	
+
+class ConfigRemoteClass(ConfigClass):
+	"""docstring for ConfigClass"""
+	def __init__(self):
+		super(ConfigRemoteClass, self).__init__()
+		self['remote_config']={}
+	def read_remote_config(self):
+		api = ApiClass(self)
+		r = api.go_api('distribute.read',{})
+		if api.is_ok():
+			self['remote_config']['distribute'] = api.payload()['distribute']
+		r = api.go_api('converter.read',{})
+		if api.is_ok():
+			self['remote_config']['converter'] = api.payload()['converter']
+		r = api.go_api('ftype.read',{})
+		if api.is_ok():
+			self['remote_config']['ftype'] = api.payload()['ftype']
+
+		
 
 class ListClass(Queue):
 	def length(self):
@@ -645,6 +665,11 @@ class ApiClass(dict):
 		return self['status']
 	def is_ok(self):
 		return (self['status'] == self.STATUS_OK)
+	def payload(self):
+		if self.has_key('payload'):
+			return self['payload']
+		else:
+			return {}
 
 
 def go_api(action,payload={}):
