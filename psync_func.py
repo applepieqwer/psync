@@ -681,9 +681,15 @@ def go_api(action,payload={}):
 	d = {"action":action,"token":token,"payload":payload}
 	try:
 		cmd = 'curl --silent -H \"Accept: application/json\" -H \"Content-type: application/json\" -X POST -d \'%s\' %s'%(json.dumps(d),url)
-		#print cmd
+		f = open('.api.dump', 'w')
+		f.write(cmd)
+		f.close()
 		result = os.popen(cmd).read()
 		return json.loads(result)
+	except ValueError as e:
+		debugset('api')
+		debuglog('go_api error:%s, curl result:%s'%(e,result))
+		raise e
 	except Exception as e:
 		debugset('api')
 		debuglog('go_api error:%s, curl result:%s'%(e,result))
