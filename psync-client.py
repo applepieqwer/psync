@@ -33,7 +33,7 @@ def main():
 	
 	#define Mission roadmap
 	Mission = { 
-	'remote_convert':['readobj','debug'] ,
+	'remote_convert':['readobj','download','debug'] ,
 	'import' :   ['fhash' , 'ftype' , 'fid' , 'distribute' , 'debug'] , 
 	'lazycheck': ['fid' , 'distribute' , 'fhash' , 'distribute' , 'debug'] ,
 	'lazytag' :  ['fid' , 'distribute' , 'fhash' , 'distribute' , 'savetag' , 'debug'] ,
