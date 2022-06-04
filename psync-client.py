@@ -29,7 +29,7 @@ def main():
 	Config = manager.Config()
 	DoneList = manager.DoneList()
 	Status = manager.Status()
-	__builtin__.db = False #dbClass(Config)
+	__builtin__.db = dbClass(Config)
 	
 	#define Mission roadmap
 	Mission = { 
@@ -82,10 +82,9 @@ def main():
 					#	MainList.put(obj)
 					#	break
 		else:
-			MainList.put({'mission':'remote_convert','fhash':'ffffa7ee2d74af65237fb0bb4ef8553c3621fa36'})
 			print "psync-client: nothing to do....exit"
-			sleep(10)
-			#####exit()
+			####sleep(10)
+			exit()
 
 	
 

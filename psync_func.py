@@ -1,6 +1,6 @@
 
 from collections import deque
-from queue import Queue
+from Queue import Queue
 from os import getpid,remove,lstat
 import os
 import __builtin__
@@ -133,6 +133,7 @@ class ConfigClass(dict):
 		self['psync_api_host'] = self._cp.get('psync_api','psync_api_host')
 		self['psync_api_url'] = self._cp.get('psync_api','psync_api_url')
 		self['psync_api_token'] = self._cp.get('psync_api','psync_api_token')
+		self['wget_target_url'] = self._cp.get('psync_local','wget_target_url')
 	def read(self,key):
 		return self.get(key)	
 
@@ -487,6 +488,8 @@ class CheckLocal_sql(CheckLocal):
 		CheckLocal.__init__(self)
 		__builtin__.db = dbClassLocal()
 	def check_pass(self,obj,Config):
+		sql = "REPLACE INTO `file_distribute` (`fid`,`did`) VALUES SELECT `fid`,'%s'  FROM `file` WHERE `fhash` = '%s'"%(Config.read('did'),obj['fhash'])
+		db.execute(sql)
 		debuglog('CheckLocal_sql Pass')
 	def check_fail(self,obj,Config):
 		sql = "DELETE FROM `file_distribute` WHERE `file_distribute`.`fid` IN (SELECT `fid`  FROM `file` WHERE `fhash` = '%s') AND `file_distribute`.`did` = %s LIMIT 1"%(obj['fhash'],Config.read('did'))
