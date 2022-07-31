@@ -35,6 +35,7 @@ except:
 
 #from shutil import copy2 as shutil_move
 from shutil import move as shutil_move
+from shutil import copy as shutil_copy
 
 def geo_osm_raw(lat,lng):
 	r = geocoder.osm([lat,lng], method='reverse')
@@ -118,7 +119,7 @@ class ConfigClass(dict):
 		self['endswith'] = eval(self._cp.get('psync_config','endswith'))
 		self['search_root'] = self._cp.get('psync_config','search_root')
 		self['data_root'] = self._cp.get('psync_config','data_root')
-		self['did'] = self._cp.get('psync_config','did')
+		self['did'] = self._cp.getint('psync_config','did')
 		self['distname'] = self._cp.get('psync_config','distname')
 		self['disttype'] = self._cp.get('psync_config','disttype')
 		self['diststate'] = self._cp.get('psync_config','diststate')
@@ -433,14 +434,21 @@ def dict2insert(table,d):
 def move_file(obj,Config):
 	dst = obj2dst(obj,Config)
 	debuglog(u'moving %s \n=====> %s'%(obj['src'],dst))
-	shutil_move(obj['src'],dst)
+	try:
+		shutil_move(obj['src'],dst)
+	except OSError as e:
+		debuglog(u'OSError: Maybe ReadOnly, try Copy.')
+		shutil_copy(obj['src'],dst)
 	os.chmod(dst, 0644)
 	obj['dst']=dst
 	return obj
 
 def rm_file(obj,Config):
 	debuglog(u'RM! %s'%obj['src'])
-	remove(obj['src'])
+	try:
+		remove(obj['src'])
+	except OSError as e:
+		debuglog(u'OSError: Maybe ReadOnly, Ignore.')
 	del obj['src']
 	return obj
 

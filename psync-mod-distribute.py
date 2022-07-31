@@ -36,7 +36,7 @@ def read_did(obj,Config):
 		rss = db.fetchall(sql)
 		obj['did'] = []
 		for rs in rss:
-			obj['did'].append(rs['did'])
+			obj['did'].append(int(rs['did']))
 		return obj
 
 def import_did(obj,Config):
